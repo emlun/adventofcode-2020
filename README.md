@@ -26,10 +26,10 @@ $ cargo run 1 foo.txt
 $ cargo run 1 - < foo.txt
 ```
 
-Running the benchmarks requires Rust nightly:
+To run the benchmarks:
 
 ```
-$ cargo +nightly bench
+$ cargo bench
 ```
 
 
