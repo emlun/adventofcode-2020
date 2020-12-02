@@ -1,7 +1,4 @@
 use crate::common::Solution;
-use std::collections::HashSet;
-
-const TARGET: i32 = 2020;
 
 fn solve_a(entries: &[(usize, usize, char, &str)]) -> usize {
     entries
@@ -13,8 +10,19 @@ fn solve_a(entries: &[(usize, usize, char, &str)]) -> usize {
         .count()
 }
 
+fn solve_b(entries: &[(usize, usize, char, &str)]) -> usize {
+    entries
+        .iter()
+        .filter(|(pos1, pos2, passchar, password)| {
+            let a = password.chars().nth(pos1 - 1) == Some(*passchar);
+            let b = password.chars().nth(pos2 - 1) == Some(*passchar);
+            a && !b || !a && b
+        })
+        .count()
+}
+
 pub fn solve(lines: &[String]) -> Solution {
-    let mut entries: Vec<(usize, usize, char, &str)> = lines
+    let entries: Vec<(usize, usize, char, &str)> = lines
         .iter()
         .map(|line| {
             let mut parts1 = line.split(": ");
@@ -33,5 +41,5 @@ pub fn solve(lines: &[String]) -> Solution {
         })
         .collect();
 
-    (solve_a(&entries).to_string(), "".to_string())
+    (solve_a(&entries).to_string(), solve_b(&entries).to_string())
 }
