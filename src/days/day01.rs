@@ -35,7 +35,7 @@ pub fn solve(lines: &[String]) -> Solution {
         .iter()
         .map(|line| line.parse::<i32>().unwrap())
         .collect();
-    numbers.sort();
+    numbers.sort_unstable();
     let numset: HashSet<i32> = numbers.iter().copied().collect();
 
     (

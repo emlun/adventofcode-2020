@@ -28,14 +28,14 @@ pub fn solve(lines: &[String]) -> Solution {
             let mut parts1 = line.split(": ");
             let policy = parts1.next().unwrap();
             let password = parts1.next().unwrap();
-            let mut parts2 = policy.split(" ");
+            let mut parts2 = policy.split(' ');
             let minmax = parts2.next().unwrap();
             let passchar = parts2.next().unwrap();
-            let mut parts3 = minmax.split("-");
+            let mut parts3 = minmax.split('-');
             (
                 parts3.next().unwrap().parse().unwrap(),
                 parts3.next().unwrap().parse().unwrap(),
-                passchar.chars().nth(0).unwrap(),
+                passchar.chars().next().unwrap(),
                 password,
             )
         })
