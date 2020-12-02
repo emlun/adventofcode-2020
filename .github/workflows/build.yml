@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        toolchain: ["stable", "nightly"]
+        toolchain: ["stable"]
 
     steps:
     - name: Check out code
