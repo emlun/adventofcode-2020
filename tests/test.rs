@@ -23,12 +23,14 @@ fn test_day(day: u8, correct_a: &str, correct_b: &str) -> Result<(), std::io::Er
 }
 
 macro_rules! test_day {
-    ($name: ident, $day: literal, $sol_a: literal, $sol_b: literal) => {
+    ($name: ident, $sol_a: literal, $sol_b: literal) => {
         #[test]
         fn $name() -> Result<(), std::io::Error> {
-            test_day($day, $sol_a, $sol_b)
+            let day_name = stringify!($name);
+            let day_num: u8 = day_name[3..].parse().unwrap();
+            test_day(day_num, $sol_a, $sol_b)
         }
     };
 }
 
-test_day!(day01, 1, "542619", "32858450");
+test_day!(day01, "542619", "32858450");
