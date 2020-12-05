@@ -62,7 +62,7 @@ fn solve_b(passports: &[HashMap<&str, &str>]) -> usize {
                     }
                     "hcl" => {
                         v.len() == 7
-                            && v.chars().next() == Some('#')
+                            && v.starts_with('#')
                             && v.chars()
                                 .skip(1)
                                 .all(|c| (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))

@@ -22,7 +22,7 @@ fn parse_seat_ids(passes: &[String]) -> Vec<usize> {
             row * 8 + col
         })
         .collect();
-    seats.sort();
+    seats.sort_unstable();
     seats
 }
 
