@@ -3,9 +3,9 @@ use std::cmp::Ordering;
 
 fn parse_binary(result: usize, c: char, zero_char: char) -> usize {
     if c == zero_char {
-        result * 2
+        result << 1
     } else {
-        result * 2 + 1
+        (result << 1) | 1
     }
 }
 
