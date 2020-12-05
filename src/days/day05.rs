@@ -1,4 +1,5 @@
 use crate::common::Solution;
+use std::cmp::Ordering;
 
 fn parse_binary(result: usize, c: char, zero_char: char) -> usize {
     if c == zero_char {
@@ -30,13 +31,20 @@ fn solve_a(seats: &[usize]) -> usize {
 }
 
 fn solve_b(seats: &[usize]) -> usize {
-    for i in 0..seats.len() {
-        let myid = seats[i] + 1;
-        if seats[i + 1] > myid {
-            return myid;
+    let mut mini = 0;
+    let mut maxi = seats.len();
+    loop {
+        if maxi <= mini {
+            return seats[mini] + 1;
+        } else {
+            let mid = (mini + maxi) / 2;
+
+            match seats[mid].cmp(&(mid + 48)) {
+                Ordering::Greater => maxi = mid - 1,
+                _ => mini = mid,
+            };
         }
     }
-    unreachable!()
 }
 
 pub fn solve(lines: &[String]) -> Solution {
