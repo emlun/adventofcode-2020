@@ -1,8 +1,34 @@
 use crate::common::Solution;
 use std::collections::HashSet;
 
-fn solve_a(groups: &[HashSet<char>]) -> usize {
-    groups.iter().map(|g| g.len()).sum()
+fn solve_a(groups: &[Vec<HashSet<char>>]) -> usize {
+    groups
+        .iter()
+        .map(|group| {
+            group
+                .iter()
+                .fold(HashSet::<char>::new(), |mut union, next| {
+                    union.extend(next);
+                    union
+                })
+                .len()
+        })
+        .sum()
+}
+
+fn solve_b(groups: &[Vec<HashSet<char>>]) -> usize {
+    groups
+        .iter()
+        .map(|group| {
+            group
+                .iter()
+                .fold(group.first().unwrap().clone(), |mut isct, next| {
+                    isct.retain(|c| next.contains(c));
+                    isct
+                })
+                .len()
+        })
+        .sum()
 }
 
 pub fn solve(lines: &[String]) -> Solution {
@@ -14,32 +40,14 @@ pub fn solve(lines: &[String]) -> Solution {
         lines
     };
 
-    let groups_a: Vec<HashSet<char>> =
-        lines.iter().fold(vec![HashSet::new()], |mut result, line| {
-            if line.is_empty() {
-                result.push(HashSet::new());
-            } else {
-                result.last_mut().unwrap().extend(line.chars());
-            }
-            result
-        });
+    let groups: Vec<Vec<HashSet<char>>> = lines.iter().fold(vec![vec![]], |mut result, line| {
+        if line.is_empty() {
+            result.push(vec![]);
+        } else {
+            result.last_mut().unwrap().push(line.chars().collect());
+        }
+        result
+    });
 
-    let groups_b: Vec<HashSet<char>> =
-        lines
-            .iter()
-            .fold(vec![('a'..='z').collect()], |mut result, line| {
-                if line.is_empty() {
-                    result.push(('a'..='z').collect());
-                } else {
-                    let person_ans: HashSet<char> = line.chars().collect();
-                    let last = result.last_mut().unwrap();
-                    last.retain(|c| person_ans.contains(c));
-                }
-                result
-            });
-
-    (
-        solve_a(&groups_a).to_string(),
-        solve_a(&groups_b).to_string(),
-    )
+    (solve_a(&groups).to_string(), solve_b(&groups).to_string())
 }
