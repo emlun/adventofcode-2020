@@ -16,13 +16,14 @@ fn solve_a(groups: &[Vec<HashSet<char>>]) -> usize {
         .sum()
 }
 
-fn solve_b(groups: &[Vec<HashSet<char>>]) -> usize {
+fn solve_b(groups: Vec<Vec<HashSet<char>>>) -> usize {
     groups
-        .iter()
-        .map(|group| {
+        .into_iter()
+        .map(|mut group| {
+            let init = group.pop().unwrap();
             group
-                .iter()
-                .fold(group.first().unwrap().clone(), |mut isct, next| {
+                .into_iter()
+                .fold(init, |mut isct, next| {
                     isct.retain(|c| next.contains(c));
                     isct
                 })
@@ -49,5 +50,5 @@ pub fn solve(lines: &[String]) -> Solution {
         result
     });
 
-    (solve_a(&groups).to_string(), solve_b(&groups).to_string())
+    (solve_a(&groups).to_string(), solve_b(groups).to_string())
 }
