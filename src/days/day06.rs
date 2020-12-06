@@ -6,11 +6,13 @@ fn solve_a(groups: &[HashSet<char>]) -> usize {
 }
 
 pub fn solve(lines: &[String]) -> Solution {
-    let mut lines: Vec<&String> = lines.iter().skip_while(|l| l.is_empty()).collect();
-    while lines[lines.len() - 1].is_empty() {
-        lines.pop();
-    }
-    let lines = lines;
+    let lines = {
+        let mut lines: &[String] = lines;
+        while lines[lines.len() - 1].is_empty() {
+            lines = &lines[..lines.len() - 1];
+        }
+        lines
+    };
 
     let groups_a: Vec<HashSet<char>> =
         lines.iter().fold(vec![HashSet::new()], |mut result, line| {
