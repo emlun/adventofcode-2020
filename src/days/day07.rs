@@ -10,9 +10,10 @@ fn solve_a(inverse_rules: &HashMap<Color, HashMap<Color, usize>>) -> usize {
     let mut queue: VecDeque<&Color> = VecDeque::new();
     queue.push_back(&("shiny", "gold"));
     while let Some(color) = queue.pop_front() {
-        seen.insert(color);
-        if let Some(containers) = inverse_rules.get(color) {
-            queue.extend(containers.keys());
+        if seen.insert(color) {
+            if let Some(containers) = inverse_rules.get(color) {
+                queue.extend(containers.keys());
+            }
         }
     }
     seen.len() - 1
