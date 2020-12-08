@@ -40,3 +40,4 @@ test_day!(day04, "250", "158");
 test_day!(day05, "874", "594");
 test_day!(day06, "6259", "3178");
 test_day!(day07, "169", "82372");
+test_day!(day08, "1087", "780");
