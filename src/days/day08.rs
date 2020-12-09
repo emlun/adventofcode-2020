@@ -12,7 +12,7 @@ enum Instruction {
 type Program = Vec<Instruction>;
 use Instruction::*;
 
-fn parse(lines: &[String]) -> Program {
+fn parse(lines: &[String]) -> Vec<Instruction> {
     lines
         .iter()
         .filter(|l| !l.is_empty())
@@ -30,7 +30,7 @@ fn parse(lines: &[String]) -> Program {
         .collect()
 }
 
-fn solve_a(program: &Program) -> Word {
+fn solve_a(program: &[Instruction]) -> Word {
     let mut acc = 0;
     let mut eip = 0;
     let mut history: HashSet<Word> = HashSet::new();
@@ -53,11 +53,8 @@ fn solve_a(program: &Program) -> Word {
     }
 }
 
-fn solve_b(program: &Program) -> Word {
-    for corruption_index in (0..program.len()).filter(|i| match program[*i] {
-        Nop(_) | Jmp(_) => true,
-        _ => false,
-    }) {
+fn solve_b(program: &[Instruction]) -> Word {
+    for corruption_index in (0..program.len()).filter(|i| matches!(program[*i], Nop(_) | Jmp(_))) {
         let mut history: HashSet<Word> = HashSet::new();
         let mut acc: Word = 0;
         let mut eip: Word = 0;

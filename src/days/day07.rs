@@ -57,7 +57,7 @@ pub fn solve(lines: &[String]) -> Solution {
                 new_rules.insert(content_color, num);
                 inverse_rules
                     .entry(content_color)
-                    .or_insert(HashMap::new())
+                    .or_insert_with(HashMap::new)
                     .insert(container_color, num);
             } else {
                 words.next();
