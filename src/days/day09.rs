@@ -23,10 +23,13 @@ fn solve_a(nums: &[usize]) -> usize {
 
 fn solve_b(nums: &[usize], a_solution: usize) -> usize {
     for seqlen in 2.. {
+        let mut sum: usize = nums[0..seqlen].iter().sum();
         for i in 0..(nums.len() - seqlen) {
             let imax = i + seqlen;
-            if nums[i..imax].iter().sum::<usize>() == a_solution {
+            if sum == a_solution {
                 return nums[i..imax].iter().min().unwrap() + nums[i..imax].iter().max().unwrap();
+            } else {
+                sum = sum - nums[i] + nums[imax];
             }
         }
     }
