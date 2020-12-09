@@ -1,32 +1,31 @@
 use crate::common::Solution;
 use std::collections::BTreeSet;
-use std::convert::TryFrom;
-use std::convert::TryInto;
 
-const WINDOW: isize = 25;
+const WINDOW: usize = 25;
 
-fn solve_a(nums: &[isize]) -> isize {
-    let mut set: BTreeSet<isize> = nums[0..WINDOW as usize].iter().copied().collect();
-    let mut i: isize = 0;
-    loop {
-        let j = nums[(i + WINDOW) as usize];
-        if set.iter().any(|n| set.contains(&(j - *n))) {
+fn solve_a(nums: &[usize]) -> usize {
+    let mut set: BTreeSet<usize> = nums[0..WINDOW as usize].iter().copied().collect();
+    for i in 0.. {
+        let imax = (i + WINDOW) as usize;
+        let j = nums[imax];
+        if set
+            .iter()
+            .any(|n| j.checked_sub(*n).map(|d| set.contains(&d)).unwrap_or(false))
+        {
             set.remove(&nums[i as usize]);
-            set.insert(nums[(i + WINDOW) as usize]);
-            i += 1;
+            set.insert(nums[imax]);
         } else {
             return j;
         }
     }
+    unreachable!()
 }
 
-fn solve_b(nums: &[isize], a_solution: isize) -> isize {
-    let mut set: BTreeSet<isize> = nums[0..WINDOW as usize].iter().copied().collect();
-    let mut i: isize = 0;
+fn solve_b(nums: &[usize], a_solution: usize) -> usize {
     for seqlen in 2.. {
         for i in 0..(nums.len() - seqlen) {
             let imax = i + seqlen;
-            if nums[i..imax].iter().sum::<isize>() == a_solution {
+            if nums[i..imax].iter().sum::<usize>() == a_solution {
                 return nums[i..imax].iter().min().unwrap() + nums[i..imax].iter().max().unwrap();
             }
         }
@@ -35,7 +34,7 @@ fn solve_b(nums: &[isize], a_solution: isize) -> isize {
 }
 
 pub fn solve(lines: &[String]) -> Solution {
-    let nums: Vec<isize> = lines
+    let nums: Vec<usize> = lines
         .iter()
         .filter(|l| !l.is_empty())
         .map(|l| l.parse().unwrap())
