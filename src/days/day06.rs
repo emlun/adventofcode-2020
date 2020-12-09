@@ -5,9 +5,9 @@ fn solve_a(groups: &[Vec<HashSet<char>>]) -> usize {
     groups
         .iter()
         .map(|group| {
-            group
+            group[1..]
                 .iter()
-                .fold(HashSet::<char>::new(), |mut union, next| {
+                .fold(group[0].clone(), |mut union, next| {
                     union.extend(next);
                     union
                 })
