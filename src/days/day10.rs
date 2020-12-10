@@ -20,9 +20,12 @@ fn solve_b(nums: &[u128]) -> u128 {
     paths_to[0] = 1;
 
     for i in 0..nums.len() - 1 {
-        for j in (i + 1..nums.len()).take(3) {
-            if nums[j] - nums[i] <= 3 {
+        let lim = nums[i] + 3;
+        for j in i + 1..nums.len() {
+            if nums[j] <= lim {
                 paths_to[j] += paths_to[i];
+            } else {
+                break;
             }
         }
     }
