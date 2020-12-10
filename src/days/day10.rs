@@ -1,5 +1,4 @@
 use crate::common::Solution;
-use std::convert::TryInto;
 
 fn solve_a(nums: &[u128]) -> u128 {
     let mut diff1 = 0;
@@ -15,27 +14,20 @@ fn solve_a(nums: &[u128]) -> u128 {
 }
 
 fn solve_b(nums: &[u128]) -> u128 {
-    if nums.len() < 2 {
-        nums.len().try_into().unwrap()
-    } else {
-        let midi = nums.len() / 2;
-        let front = &nums[0..midi];
-        let back = &nums[midi..];
+    // Thanks @f00ale for this algorithm
 
-        let mut arrangements = 0;
+    let mut paths_to = vec![0; nums.len()];
+    paths_to[0] = 1;
 
-        for dfronti in 0..std::cmp::min(3, front.len()) {
-            let fronti = front.len() - dfronti - 1;
-            for backi in 0..std::cmp::min(3, back.len()) {
-                if back[backi] - front[fronti] <= 3 {
-                    arrangements += solve_b(&front[0..=fronti]) * solve_b(&back[backi..]);
-                } else {
-                    break;
-                }
+    for i in 0..nums.len() - 1 {
+        for j in (i + 1..nums.len()).take(3) {
+            if nums[j] - nums[i] <= 3 {
+                paths_to[j] += paths_to[i];
             }
         }
-        arrangements
     }
+
+    *paths_to.last().unwrap()
 }
 
 pub fn solve(lines: &[String]) -> Solution {
