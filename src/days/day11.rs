@@ -74,7 +74,7 @@ fn solve_a(map: Vec<Vec<Tile>>) -> usize {
     };
 
     stable
-        .into_iter()
+        .iter_mut()
         .flatten()
         .filter(|tile| **tile == Tile::Occupied)
         .count()
@@ -164,7 +164,7 @@ fn solve_b(map: Vec<Vec<Tile>>) -> usize {
     };
 
     stable
-        .into_iter()
+        .iter_mut()
         .flatten()
         .filter(|tile| **tile == Tile::Occupied)
         .count()
