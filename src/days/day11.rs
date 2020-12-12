@@ -1,10 +1,29 @@
 use crate::common::Solution;
 
-#[derive(Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 enum Tile {
     Floor,
     Free,
     Occupied,
+}
+
+#[allow(unused)]
+fn print_state(state: &[Vec<Tile>]) {
+    println!(
+        "{}\n",
+        state
+            .iter()
+            .map(|row| row
+                .iter()
+                .map(|tile| match tile {
+                    Tile::Floor => '.',
+                    Tile::Free => 'L',
+                    Tile::Occupied => '#',
+                })
+                .collect::<String>())
+            .collect::<Vec<String>>()
+            .join("\n")
+    );
 }
 
 fn solve_a(map: Vec<Vec<Tile>>) -> usize {
@@ -18,22 +37,6 @@ fn solve_a(map: Vec<Vec<Tile>>) -> usize {
     let mut next = &mut buf2;
 
     let stable = loop {
-        // println!(
-        //     "{}\n",
-        //     current
-        //         .iter()
-        //         .map(|row| row
-        //             .iter()
-        //             .map(|tile| match tile {
-        //                 Tile::Floor => '.',
-        //                 Tile::Free => 'L',
-        //                 Tile::Occupied => '#',
-        //             })
-        //             .collect::<String>())
-        //         .collect::<Vec<String>>()
-        //         .join("\n")
-        // );
-
         for r in 1..(h - 1) {
             for c in 1..(w - 1) {
                 let num_neighbors = ((r - 1)..=(r + 1))
@@ -42,7 +45,6 @@ fn solve_a(map: Vec<Vec<Tile>>) -> usize {
                     .map(|(nr, nc)| &current[nr][nc])
                     .filter(|tile| **tile == Tile::Occupied)
                     .count();
-                // println!("{}", num_neighbors);
 
                 next[r][c] = match current[r][c] {
                     Tile::Free => {
@@ -91,22 +93,6 @@ fn solve_b(map: Vec<Vec<Tile>>) -> usize {
     let mut next = &mut buf2;
 
     let stable = loop {
-        // println!(
-        //     "{}\n",
-        //     current
-        //         .iter()
-        //         .map(|row| row
-        //             .iter()
-        //             .map(|tile| match tile {
-        //                 Tile::Floor => '.',
-        //                 Tile::Free => 'L',
-        //                 Tile::Occupied => '#',
-        //             })
-        //             .collect::<String>())
-        //         .collect::<Vec<String>>()
-        //         .join("\n")
-        // );
-
         for r in 1..(h - 1) {
             for c in 1..(w - 1) {
                 let mut num_neighbors = 0;
@@ -175,22 +161,22 @@ pub fn solve(lines: &[String]) -> Solution {
         .iter()
         .filter(|l| !l.is_empty())
         .map(|l| {
-            ['.']
+            [Tile::Floor]
                 .iter()
                 .copied()
-                .chain(l.chars())
-                .chain(['.'].iter().copied())
-                .map(|c| match c {
+                .chain(l.chars().map(|c| match c {
                     '.' => Tile::Floor,
                     'L' => Tile::Free,
                     '#' => Tile::Occupied,
                     _ => unreachable!(),
-                })
+                }))
+                .chain([Tile::Floor].iter().copied())
                 .collect()
         })
         .collect();
     map.insert(0, vec![Tile::Floor; map[0].len()]);
     map.push(vec![Tile::Floor; map[0].len()]);
+    let map = map;
 
     (solve_a(map.clone()).to_string(), solve_b(map).to_string())
 }
