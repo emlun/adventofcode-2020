@@ -36,13 +36,19 @@ fn solve_a(map: Vec<Vec<Tile>>) -> usize {
     let mut current = &mut buf1;
     let mut next = &mut buf2;
 
+    let drdc: Vec<(isize, isize)> = ((-1)..=1)
+        .flat_map(|dr| ((-1)..=1).map(move |dc| (dr, dc)))
+        .filter(|(dr, dc)| (*dr, *dc) != (0, 0))
+        .collect();
+
     let stable = loop {
         for r in 1..(h - 1) {
             for c in 1..(w - 1) {
-                let num_neighbors = ((r - 1)..=(r + 1))
-                    .flat_map(|nr| ((c - 1)..=(c + 1)).map(move |nc| (nr, nc)))
-                    .filter(|(nr, nc)| (*nr, *nc) != (r, c))
-                    .map(|(nr, nc)| &current[nr][nc])
+                let num_neighbors = drdc
+                    .iter()
+                    .map(|(dr, dc)| {
+                        &current[(r as isize + dr) as usize][(c as isize + dc) as usize]
+                    })
                     .filter(|tile| **tile == Tile::Occupied)
                     .count();
 
@@ -92,14 +98,16 @@ fn solve_b(map: Vec<Vec<Tile>>) -> usize {
     let mut current = &mut buf1;
     let mut next = &mut buf2;
 
+    let drdc: Vec<(isize, isize)> = ((-1)..=1)
+        .flat_map(|dr| ((-1)..=1).map(move |dc| (dr, dc)))
+        .filter(|(dr, dc)| (*dr, *dc) != (0, 0))
+        .collect();
+
     let stable = loop {
         for r in 1..(h - 1) {
             for c in 1..(w - 1) {
                 let mut num_neighbors = 0;
-                for (dr, dc) in ((-1_isize)..=(1))
-                    .flat_map(|dr| ((-1_isize)..=(1)).map(move |dc| (dr, dc)))
-                    .filter(|(dr, dc)| (*dr, *dc) != (0, 0))
-                {
+                for (dr, dc) in &drdc {
                     for i in 1.. {
                         let nr = (r as isize + i * dr) as usize;
                         let nc = (c as isize + i * dc) as usize;
