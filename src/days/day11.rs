@@ -108,6 +108,9 @@ fn solve_b(map: Vec<Vec<Tile>>) -> usize {
             for c in 1..(w - 1) {
                 let mut num_neighbors = 0;
                 for (dr, dc) in &drdc {
+                    if num_neighbors >= 5 {
+                        break;
+                    }
                     for i in 1.. {
                         let nr = (r as isize + i * dr) as usize;
                         let nc = (c as isize + i * dc) as usize;
