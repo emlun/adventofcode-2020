@@ -44,33 +44,35 @@ fn solve_a(map: Vec<Vec<Tile>>) -> usize {
     let stable = loop {
         for r in 1..(h - 1) {
             for c in 1..(w - 1) {
-                let num_neighbors = drdc
-                    .iter()
-                    .map(|(dr, dc)| {
-                        &current[(r as isize + dr) as usize][(c as isize + dc) as usize]
-                    })
-                    .filter(|tile| **tile == Tile::Occupied)
-                    .count();
+                if current[r][c] != Tile::Floor {
+                    let num_neighbors = drdc
+                        .iter()
+                        .map(|(dr, dc)| {
+                            &current[(r as isize + dr) as usize][(c as isize + dc) as usize]
+                        })
+                        .filter(|tile| **tile == Tile::Occupied)
+                        .count();
 
-                next[r][c] = match current[r][c] {
-                    Tile::Free => {
-                        if num_neighbors == 0 {
-                            Tile::Occupied
-                        } else {
-                            Tile::Free
+                    next[r][c] = match current[r][c] {
+                        Tile::Free => {
+                            if num_neighbors == 0 {
+                                Tile::Occupied
+                            } else {
+                                Tile::Free
+                            }
                         }
-                    }
 
-                    Tile::Occupied => {
-                        if num_neighbors >= 4 {
-                            Tile::Free
-                        } else {
-                            Tile::Occupied
+                        Tile::Occupied => {
+                            if num_neighbors >= 4 {
+                                Tile::Free
+                            } else {
+                                Tile::Occupied
+                            }
                         }
-                    }
 
-                    Tile::Floor => Tile::Floor,
-                };
+                        Tile::Floor => unreachable!(),
+                    };
+                }
             }
         }
 
@@ -106,50 +108,52 @@ fn solve_b(map: Vec<Vec<Tile>>) -> usize {
     let stable = loop {
         for r in 1..(h - 1) {
             for c in 1..(w - 1) {
-                let mut num_neighbors = 0;
-                for (dr, dc) in &drdc {
-                    if num_neighbors >= 5 {
-                        break;
-                    }
-                    for i in 1.. {
-                        let nr = (r as isize + i * dr) as usize;
-                        let nc = (c as isize + i * dc) as usize;
-                        if nr == 0 || nc == 0 || nr >= h || nc >= w {
+                if current[r][c] != Tile::Floor {
+                    let mut num_neighbors = 0;
+                    for (dr, dc) in &drdc {
+                        if num_neighbors >= 5 {
                             break;
-                        } else {
-                            match current[nr][nc] {
-                                Tile::Floor => {}
-                                Tile::Free => {
-                                    break;
-                                }
-                                Tile::Occupied => {
-                                    num_neighbors += 1;
-                                    break;
+                        }
+                        for i in 1.. {
+                            let nr = (r as isize + i * dr) as usize;
+                            let nc = (c as isize + i * dc) as usize;
+                            if nr == 0 || nc == 0 || nr >= h || nc >= w {
+                                break;
+                            } else {
+                                match current[nr][nc] {
+                                    Tile::Floor => {}
+                                    Tile::Free => {
+                                        break;
+                                    }
+                                    Tile::Occupied => {
+                                        num_neighbors += 1;
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
+
+                    next[r][c] = match current[r][c] {
+                        Tile::Free => {
+                            if num_neighbors == 0 {
+                                Tile::Occupied
+                            } else {
+                                Tile::Free
+                            }
+                        }
+
+                        Tile::Occupied => {
+                            if num_neighbors >= 5 {
+                                Tile::Free
+                            } else {
+                                Tile::Occupied
+                            }
+                        }
+
+                        Tile::Floor => unreachable!(),
+                    };
                 }
-
-                next[r][c] = match current[r][c] {
-                    Tile::Free => {
-                        if num_neighbors == 0 {
-                            Tile::Occupied
-                        } else {
-                            Tile::Free
-                        }
-                    }
-
-                    Tile::Occupied => {
-                        if num_neighbors >= 5 {
-                            Tile::Free
-                        } else {
-                            Tile::Occupied
-                        }
-                    }
-
-                    Tile::Floor => Tile::Floor,
-                };
             }
         }
 
