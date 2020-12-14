@@ -1,4 +1,5 @@
 use crate::common::Solution;
+use std::collections::HashMap;
 
 #[derive(Copy, Clone, PartialEq)]
 enum Tile {
@@ -83,6 +84,29 @@ fn solve_b(map: Vec<Vec<Tile>>, nonfloors: &[(usize, usize)], drdc: &[(isize, is
     let h = map.len();
     let w = map[0].len();
 
+    let neighbors: HashMap<(usize, usize), Vec<(usize, usize)>> = nonfloors
+        .iter()
+        .copied()
+        .map(|(r, c)| {
+            (
+                (r, c),
+                drdc.iter()
+                    .flat_map(|(dr, dc)| {
+                        (1..)
+                            .map(|i| {
+                                (
+                                    (r as isize + i * dr) as usize,
+                                    (c as isize + i * dc) as usize,
+                                )
+                            })
+                            .take_while(|(nr, nc)| nr > &0 && nc > &0 && nr < &h && nc < &w)
+                            .find(|(nr, nc)| map[*nr][*nc] != Tile::Floor)
+                    })
+                    .collect(),
+            )
+        })
+        .collect();
+
     let mut buf1 = map;
     let mut buf2 = vec![vec![Tile::Floor; w]; h];
 
@@ -91,30 +115,11 @@ fn solve_b(map: Vec<Vec<Tile>>, nonfloors: &[(usize, usize)], drdc: &[(isize, is
 
     let stable = loop {
         for (r, c) in nonfloors.iter().copied() {
-            let mut num_neighbors = 0;
-            for (dr, dc) in drdc {
-                if num_neighbors >= 5 {
-                    break;
-                }
-                for i in 1.. {
-                    let nr = (r as isize + i * dr) as usize;
-                    let nc = (c as isize + i * dc) as usize;
-                    if nr == 0 || nc == 0 || nr >= h || nc >= w {
-                        break;
-                    } else {
-                        match current[nr][nc] {
-                            Tile::Floor => {}
-                            Tile::Free => {
-                                break;
-                            }
-                            Tile::Occupied => {
-                                num_neighbors += 1;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
+            let num_neighbors = neighbors[&(r, c)]
+                .iter()
+                .filter(|(nr, nc)| current[*nr][*nc] == Tile::Occupied)
+                .take(5)
+                .count();
 
             next[r][c] = match current[r][c] {
                 Tile::Free => {
