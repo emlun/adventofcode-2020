@@ -3,7 +3,7 @@ use crate::common::Solution;
 fn solve_for(init: &[usize], target: usize) -> usize {
     let turn0 = init.len() - 1;
     let mut next: usize = *init.last().unwrap();
-    let mut last_seen: Vec<usize> = vec![target * 2; target];
+    let mut last_seen: Vec<usize> = vec![target; target];
     for (i, n) in init.iter().enumerate() {
         last_seen[*n] = i;
     }
