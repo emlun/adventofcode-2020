@@ -1,31 +1,43 @@
 use crate::common::Solution;
-use std::collections::BTreeSet;
 use std::collections::HashMap;
 
-fn solve_a(lines: &[String]) -> usize {
-    let mut history: Vec<usize> = lines[0].split(',').map(|s| s.parse().unwrap()).collect();
+fn solve_for(lines: &[String], target: usize) -> usize {
+    let init: Vec<usize> = lines[0].split(',').map(|s| s.parse().unwrap()).collect();
+    let mut turn = init.len() - 1;
+
+    let mut next: usize = init[turn];
+    let mut last_seen: HashMap<usize, usize> = init
+        .into_iter()
+        .take(turn)
+        .enumerate()
+        .map(|(i, n)| (n, i))
+        .collect();
 
     loop {
-        let last = history.last().unwrap();
-
-        if history.len() == 2020 {
-            return *last;
+        if turn + 1 == target {
+            return next;
         }
 
-        let mut found = false;
-        for i in (0..history.len() - 1).rev() {
-            if history[i] == *last {
-                history.push(history.len() - i - 1);
-                found = true;
-                break;
-            }
+        if let Some(last_seen_at) = last_seen.get_mut(&next) {
+            next = turn - *last_seen_at;
+            *last_seen_at = turn;
+        } else {
+            last_seen.insert(next, turn);
+            next = 0;
         }
-        if !found {
-            history.push(0);
-        }
+
+        turn += 1;
     }
 }
 
+fn solve_a(lines: &[String]) -> usize {
+    solve_for(lines, 2020)
+}
+
+fn solve_b(lines: &[String]) -> usize {
+    solve_for(lines, 30000000)
+}
+
 pub fn solve(lines: &[String]) -> Solution {
-    (solve_a(lines).to_string(), "".to_string())
+    (solve_a(lines).to_string(), solve_b(lines).to_string())
 }
