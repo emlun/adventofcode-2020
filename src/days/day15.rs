@@ -20,15 +20,10 @@ fn solve_for(init: &[usize], target: usize) -> usize {
     next
 }
 
-fn solve_a(init: &[usize]) -> usize {
-    solve_for(init, 2020)
-}
-
-fn solve_b(init: &[usize]) -> usize {
-    solve_for(init, 30000000)
-}
-
 pub fn solve(lines: &[String]) -> Solution {
     let init: Vec<usize> = lines[0].split(',').map(|s| s.parse().unwrap()).collect();
-    (solve_a(&init).to_string(), solve_b(&init).to_string())
+    (
+        solve_for(&init, 2020).to_string(),
+        solve_for(&init, 30000000).to_string(),
+    )
 }
