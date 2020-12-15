@@ -1,28 +1,25 @@
 use crate::common::Solution;
-use std::collections::HashMap;
 
 fn solve_for(lines: &[String], target: usize) -> usize {
     let init: Vec<usize> = lines[0].split(',').map(|s| s.parse().unwrap()).collect();
     let mut turn = init.len() - 1;
 
     let mut next: usize = init[turn];
-    let mut last_seen: HashMap<usize, usize> = init
-        .into_iter()
-        .take(turn)
-        .enumerate()
-        .map(|(i, n)| (n, i))
-        .collect();
+    let mut last_seen: Vec<Option<usize>> = vec![None; target];
+    for (i, n) in init.into_iter().enumerate() {
+        last_seen[n] = Some(i);
+    }
 
     loop {
         if turn + 1 == target {
             return next;
         }
 
-        if let Some(last_seen_at) = last_seen.get_mut(&next) {
+        if let Some(last_seen_at) = &mut last_seen[next] {
             next = turn - *last_seen_at;
             *last_seen_at = turn;
         } else {
-            last_seen.insert(next, turn);
+            last_seen[next] = Some(turn);
             next = 0;
         }
 
