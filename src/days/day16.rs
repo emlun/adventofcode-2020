@@ -5,7 +5,7 @@ use std::ops::RangeInclusive;
 
 fn solve_a(
     rules: &HashMap<&str, Vec<RangeInclusive<usize>>>,
-    other_tickets: &Vec<Vec<usize>>,
+    other_tickets: &[Vec<usize>],
 ) -> usize {
     other_tickets
         .iter()
@@ -21,7 +21,7 @@ fn solve_a(
 
 fn discard_invalid(
     rules: &HashMap<&str, Vec<RangeInclusive<usize>>>,
-    tickets: &Vec<Vec<usize>>,
+    tickets: &[Vec<usize>],
 ) -> Vec<Vec<usize>> {
     tickets
         .iter()
@@ -39,8 +39,8 @@ fn discard_invalid(
 
 fn solve_b(
     rules: &HashMap<&str, Vec<RangeInclusive<usize>>>,
-    your_ticket: &Vec<usize>,
-    other_tickets: &Vec<Vec<usize>>,
+    your_ticket: &[usize],
+    other_tickets: &[Vec<usize>],
 ) -> usize {
     let valid_other_tickets = discard_invalid(rules, other_tickets);
 
