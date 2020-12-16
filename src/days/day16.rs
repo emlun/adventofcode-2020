@@ -45,33 +45,33 @@ fn solve_b(
 ) -> usize {
     let valid_other_tickets = discard_invalid(rules, other_tickets);
 
-    let mut field_mapping: HashMap<usize, HashSet<&str>> = (0..)
-        .take_while(|i| valid_other_tickets.iter().any(|t| t.len() >= *i))
-        .flat_map(|i| {
-            let mut possible_fields = valid_other_tickets
-                .iter()
-                .flat_map(|ticket| ticket.get(i))
-                .map(|field_value| {
-                    let possible_fields_for_this_value: HashSet<&str> = rules
-                        .keys()
-                        .copied()
-                        .filter(|k| {
-                            rules
-                                .get(k)
-                                .unwrap()
-                                .iter()
-                                .any(|rule| rule.contains(field_value))
-                        })
-                        .collect();
-                    possible_fields_for_this_value
-                });
+    let mut field_mapping: HashMap<usize, HashSet<&str>> =
+        (0..valid_other_tickets.iter().map(|t| t.len()).max().unwrap())
+            .flat_map(|i| {
+                let mut possible_fields = valid_other_tickets
+                    .iter()
+                    .flat_map(|ticket| ticket.get(i))
+                    .map(|field_value| {
+                        let possible_fields_for_this_value: HashSet<&str> = rules
+                            .keys()
+                            .copied()
+                            .filter(|k| {
+                                rules
+                                    .get(k)
+                                    .unwrap()
+                                    .iter()
+                                    .any(|rule| rule.contains(field_value))
+                            })
+                            .collect();
+                        possible_fields_for_this_value
+                    });
 
-            possible_fields
-                .next()
-                .map(|first| first.intersection_all(possible_fields))
-                .map(|isct| (i, isct))
-        })
-        .collect();
+                possible_fields
+                    .next()
+                    .map(|first| first.intersection_all(possible_fields))
+                    .map(|isct| (i, isct))
+            })
+            .collect();
 
     let field_keys: HashSet<usize> = field_mapping.keys().copied().collect();
     while field_mapping.iter().any(|(_, v)| v.len() > 1) {
