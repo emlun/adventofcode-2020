@@ -48,28 +48,28 @@ fn solve_b(
     let mut field_mapping: HashMap<usize, HashSet<&str>> = (0..)
         .take_while(|i| valid_other_tickets.iter().any(|t| t.len() >= *i))
         .flat_map(|i| {
-            let mut possible_fields: Vec<HashSet<&str>> = valid_other_tickets
+            let mut possible_fields = valid_other_tickets
                 .iter()
                 .flat_map(|ticket| ticket.get(i))
                 .map(|field_value| {
-                    let possible_fields_for_this_value = rules
+                    let possible_fields_for_this_value: HashSet<&str> = rules
                         .keys()
+                        .copied()
                         .filter(|k| {
                             rules
-                                .get(*k)
+                                .get(k)
                                 .unwrap()
                                 .iter()
                                 .any(|rule| rule.contains(field_value))
                         })
-                        .map(|k| *k)
                         .collect();
                     possible_fields_for_this_value
-                })
-                .collect();
+                });
 
             possible_fields
-                .pop()
-                .map(|first| (i, first.intersection_all(possible_fields.iter())))
+                .next()
+                .map(|first| first.intersection_all(possible_fields))
+                .map(|isct| (i, isct))
         })
         .collect();
 
