@@ -1,5 +1,4 @@
 use crate::common::Solution;
-use crate::util::collections::IntersectionAll;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::ops::RangeInclusive;
@@ -47,29 +46,26 @@ fn solve_b(
 
     let mut field_mapping: HashMap<usize, HashSet<&str>> =
         (0..valid_other_tickets.iter().map(|t| t.len()).max().unwrap())
-            .flat_map(|i| {
-                let mut possible_fields = valid_other_tickets
+            .map(|i| {
+                let values_in_this_field: HashSet<&usize> = valid_other_tickets
                     .iter()
                     .flat_map(|ticket| ticket.get(i))
-                    .map(|field_value| {
-                        let possible_fields_for_this_value: HashSet<&str> = rules
-                            .keys()
-                            .copied()
-                            .filter(|k| {
-                                rules
-                                    .get(k)
-                                    .unwrap()
-                                    .iter()
-                                    .any(|rule| rule.contains(field_value))
-                            })
-                            .collect();
-                        possible_fields_for_this_value
-                    });
+                    .collect();
 
-                possible_fields
-                    .next()
-                    .map(|first| first.intersection_all(possible_fields))
-                    .map(|isct| (i, isct))
+                let possible_fields = rules
+                    .iter()
+                    .filter(|(_, ranges)| {
+                        values_in_this_field.iter().all(|v| {
+                            ranges
+                                .iter()
+                                .any(|range: &RangeInclusive<usize>| range.contains(v))
+                        })
+                    })
+                    .map(|(k, _)| k)
+                    .copied()
+                    .collect();
+
+                (i, possible_fields)
             })
             .collect();
 
