@@ -1,4 +1,5 @@
 use crate::common::Solution;
+use crate::util::collections::IntersectionAll;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::ops::RangeInclusive;
@@ -68,11 +69,9 @@ fn solve_b(
 
             (
                 i,
-                possible_fields.pop().map(|first| {
-                    possible_fields.into_iter().fold(first, |isct, next| {
-                        isct.intersection(&next).copied().collect()
-                    })
-                }),
+                possible_fields
+                    .pop()
+                    .map(|first| first.intersection_all(possible_fields.iter())),
             )
         })
         .flat_map(|(k, v)| v.map(|v| (k, v)))

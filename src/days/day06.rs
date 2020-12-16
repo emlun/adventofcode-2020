@@ -1,4 +1,5 @@
 use crate::common::Solution;
+use crate::util::collections::IntersectionAll;
 use std::collections::HashSet;
 
 fn solve_a(groups: &[Vec<HashSet<char>>]) -> usize {
@@ -19,16 +20,7 @@ fn solve_a(groups: &[Vec<HashSet<char>>]) -> usize {
 fn solve_b(groups: Vec<Vec<HashSet<char>>>) -> usize {
     groups
         .into_iter()
-        .map(|mut group| {
-            let init = group.pop().unwrap();
-            group
-                .into_iter()
-                .fold(init, |mut isct, next| {
-                    isct.retain(|c| next.contains(c));
-                    isct
-                })
-                .len()
-        })
+        .map(|mut group| group.pop().unwrap().intersection_all(group.iter()).len())
         .sum()
 }
 

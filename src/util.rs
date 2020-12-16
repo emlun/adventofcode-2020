@@ -1,3 +1,4 @@
+pub mod collections;
 pub mod iter;
 pub mod permutations;
 
