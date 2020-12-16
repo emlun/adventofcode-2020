@@ -44,37 +44,39 @@ fn solve_b(
 ) -> usize {
     let valid_other_tickets = discard_invalid(rules, other_tickets);
 
-    let mut field_mapping: HashMap<usize, HashSet<&&str>> =
-        (0..valid_other_tickets.iter().map(|t| t.len()).max().unwrap())
-            .map(|i| {
-                let values_in_this_field: HashSet<&usize> = valid_other_tickets
-                    .iter()
-                    .flat_map(|ticket| ticket.get(i))
-                    .collect();
+    let field_keys: HashSet<usize> =
+        (0..valid_other_tickets.iter().map(|t| t.len()).max().unwrap()).collect();
 
-                let possible_fields = rules
-                    .iter()
-                    .filter(|(_, ranges)| {
-                        values_in_this_field.iter().all(|v| {
-                            ranges
-                                .iter()
-                                .any(|range: &RangeInclusive<usize>| range.contains(v))
-                        })
+    let mut field_mapping: HashMap<&usize, HashSet<&&str>> = field_keys
+        .iter()
+        .map(|i| {
+            let values_in_this_field: HashSet<&usize> = valid_other_tickets
+                .iter()
+                .flat_map(|ticket| ticket.get(*i))
+                .collect();
+
+            let possible_fields = rules
+                .iter()
+                .filter(|(_, ranges)| {
+                    values_in_this_field.iter().all(|v| {
+                        ranges
+                            .iter()
+                            .any(|range: &RangeInclusive<usize>| range.contains(v))
                     })
-                    .map(|(k, _)| k)
-                    .collect();
+                })
+                .map(|(k, _)| k)
+                .collect();
 
-                (i, possible_fields)
-            })
-            .collect();
+            (i, possible_fields)
+        })
+        .collect();
 
-    let field_keys: HashSet<usize> = field_mapping.keys().copied().collect();
     while field_mapping.iter().any(|(_, v)| v.len() > 1) {
         for field_key in &field_keys {
             if field_mapping[field_key].len() > 1 {
                 let disallowed_fields: HashSet<&&str> = field_mapping
                     .iter()
-                    .filter(|(k, v)| *k != field_key && v.len() == 1)
+                    .filter(|(k, v)| **k != field_key && v.len() == 1)
                     .flat_map(|(_, v)| v.iter())
                     .copied()
                     .collect();
@@ -90,7 +92,7 @@ fn solve_b(
     field_mapping
         .iter()
         .filter(|(_, v)| v.iter().next().unwrap().starts_with("departure"))
-        .map(|(k, _)| your_ticket.get(*k).unwrap())
+        .map(|(k, _)| your_ticket.get(**k).unwrap())
         .product()
 }
 
