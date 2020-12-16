@@ -44,7 +44,7 @@ fn solve_b(
 ) -> usize {
     let valid_other_tickets = discard_invalid(rules, other_tickets);
 
-    let mut field_mapping: HashMap<usize, HashSet<&str>> =
+    let mut field_mapping: HashMap<usize, HashSet<&&str>> =
         (0..valid_other_tickets.iter().map(|t| t.len()).max().unwrap())
             .map(|i| {
                 let values_in_this_field: HashSet<&usize> = valid_other_tickets
@@ -62,7 +62,6 @@ fn solve_b(
                         })
                     })
                     .map(|(k, _)| k)
-                    .copied()
                     .collect();
 
                 (i, possible_fields)
@@ -73,7 +72,7 @@ fn solve_b(
     while field_mapping.iter().any(|(_, v)| v.len() > 1) {
         for field_key in &field_keys {
             if field_mapping[field_key].len() > 1 {
-                let disallowed_fields: HashSet<&str> = field_mapping
+                let disallowed_fields: HashSet<&&str> = field_mapping
                     .iter()
                     .filter(|(k, v)| *k != field_key && v.len() == 1)
                     .flat_map(|(_, v)| v.iter())
