@@ -79,8 +79,7 @@ fn solve_b(
         .collect();
 
     let field_keys: HashSet<usize> = field_mapping.keys().copied().collect();
-    loop {
-        let mut done = true;
+    while field_mapping.iter().any(|(_, v)| v.len() > 1) {
         for field_key in &field_keys {
             if field_mapping[field_key].len() > 1 {
                 let disallowed_fields: HashSet<&str> = field_mapping
@@ -94,13 +93,7 @@ fn solve_b(
                     .get_mut(field_key)
                     .unwrap()
                     .retain(|k| !disallowed_fields.contains(k));
-
-                done = false;
             }
-        }
-
-        if done {
-            break;
         }
     }
 
