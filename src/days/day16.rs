@@ -56,11 +56,9 @@ fn solve_b(
             let possible_fields = rules
                 .iter()
                 .filter(|(_, ranges)| {
-                    values_in_this_field.iter().all(|v| {
-                        ranges
-                            .iter()
-                            .any(|range: &RangeInclusive<u16>| range.contains(v))
-                    })
+                    values_in_this_field
+                        .iter()
+                        .all(|v| ranges.iter().any(|range| range.contains(v)))
                 })
                 .map(|(k, _)| k)
                 .collect();
