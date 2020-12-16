@@ -3,10 +3,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::ops::RangeInclusive;
 
-fn solve_a(
-    rules: &HashMap<&str, Vec<RangeInclusive<usize>>>,
-    other_tickets: &[Vec<usize>],
-) -> usize {
+fn solve_a(rules: &HashMap<&str, Vec<RangeInclusive<u16>>>, other_tickets: &[Vec<u16>]) -> u16 {
     other_tickets
         .iter()
         .flat_map(|t| t.iter())
@@ -14,15 +11,15 @@ fn solve_a(
             !rules
                 .values()
                 .flatten()
-                .any(|allowed: &RangeInclusive<usize>| allowed.contains(*n))
+                .any(|allowed: &RangeInclusive<u16>| allowed.contains(*n))
         })
         .sum()
 }
 
 fn discard_invalid(
-    rules: &HashMap<&str, Vec<RangeInclusive<usize>>>,
-    tickets: &[Vec<usize>],
-) -> Vec<Vec<usize>> {
+    rules: &HashMap<&str, Vec<RangeInclusive<u16>>>,
+    tickets: &[Vec<u16>],
+) -> Vec<Vec<u16>> {
     tickets
         .iter()
         .filter(|ticket| {
@@ -30,7 +27,7 @@ fn discard_invalid(
                 rules
                     .values()
                     .flatten()
-                    .any(|allowed: &RangeInclusive<usize>| allowed.contains(n))
+                    .any(|allowed: &RangeInclusive<u16>| allowed.contains(n))
             })
         })
         .cloned()
@@ -38,10 +35,10 @@ fn discard_invalid(
 }
 
 fn solve_b(
-    rules: &HashMap<&str, Vec<RangeInclusive<usize>>>,
-    your_ticket: &[usize],
-    other_tickets: &[Vec<usize>],
-) -> usize {
+    rules: &HashMap<&str, Vec<RangeInclusive<u16>>>,
+    your_ticket: &[u16],
+    other_tickets: &[Vec<u16>],
+) -> u64 {
     let valid_other_tickets = discard_invalid(rules, other_tickets);
 
     let field_keys: HashSet<usize> =
@@ -50,9 +47,10 @@ fn solve_b(
     let mut field_mapping: HashMap<&usize, HashSet<&&str>> = field_keys
         .iter()
         .map(|i| {
-            let values_in_this_field: HashSet<&usize> = valid_other_tickets
+            let values_in_this_field: HashSet<u16> = valid_other_tickets
                 .iter()
                 .flat_map(|ticket| ticket.get(*i))
+                .copied()
                 .collect();
 
             let possible_fields = rules
@@ -61,7 +59,7 @@ fn solve_b(
                     values_in_this_field.iter().all(|v| {
                         ranges
                             .iter()
-                            .any(|range: &RangeInclusive<usize>| range.contains(v))
+                            .any(|range: &RangeInclusive<u16>| range.contains(v))
                     })
                 })
                 .map(|(k, _)| k)
@@ -92,7 +90,7 @@ fn solve_b(
     field_mapping
         .iter()
         .filter(|(_, v)| v.iter().next().unwrap().starts_with("departure"))
-        .map(|(k, _)| your_ticket.get(**k).unwrap())
+        .map(|(k, _)| u64::from(your_ticket[**k]))
         .product()
 }
 
@@ -104,9 +102,9 @@ pub fn solve(lines: &[String]) -> Solution {
     }
     let mut phase = ParsePhase::Prelude;
 
-    let mut rules: HashMap<&str, Vec<RangeInclusive<usize>>> = HashMap::new();
-    let mut your_ticket: Vec<usize> = vec![];
-    let mut other_tickets: Vec<Vec<usize>> = vec![];
+    let mut rules: HashMap<&str, Vec<RangeInclusive<u16>>> = HashMap::new();
+    let mut your_ticket: Vec<u16> = vec![];
+    let mut other_tickets: Vec<Vec<u16>> = vec![];
 
     for line in lines {
         if line.is_empty() {
