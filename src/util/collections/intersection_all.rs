@@ -4,16 +4,17 @@ pub trait IntersectionAll<'a, T, I> {
     fn intersection_all(self, others: I) -> Self;
 }
 
-impl<'a, T, I> IntersectionAll<'a, T, I> for HashSet<T>
+impl<'a, T, Iter, Set> IntersectionAll<'a, T, Iter> for HashSet<T>
 where
-    I: IntoIterator<Item = &'a HashSet<T>>,
+    Iter: IntoIterator<Item = Set>,
     T: 'a,
     T: Eq,
     T: std::hash::Hash,
+    Set: std::borrow::Borrow<HashSet<T>>,
 {
-    fn intersection_all(mut self, rest: I) -> HashSet<T> {
+    fn intersection_all(mut self, rest: Iter) -> Self {
         for r in rest.into_iter() {
-            self.retain(|elem| r.contains(elem));
+            self.retain(|elem| r.borrow().contains(elem));
         }
         self
     }

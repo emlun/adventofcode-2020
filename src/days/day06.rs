@@ -20,7 +20,7 @@ fn solve_a(groups: &[Vec<HashSet<char>>]) -> usize {
 fn solve_b(groups: Vec<Vec<HashSet<char>>>) -> usize {
     groups
         .into_iter()
-        .map(|mut group| group.pop().unwrap().intersection_all(group.iter()).len())
+        .map(|mut group| group.pop().unwrap().intersection_all(group).len())
         .sum()
 }
 
