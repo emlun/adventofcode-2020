@@ -1,18 +1,16 @@
-use std::path::Path;
+mod crate_info;
 
 use clap::App;
 use clap::Arg;
+use std::path::Path;
 
-mod common;
-mod crate_info;
-mod days;
-
-use crate::common::day_input_filename;
-use crate::common::get_file_lines;
 use crate::crate_info::crate_author;
 use crate::crate_info::crate_description;
 use crate::crate_info::crate_name;
 use crate::crate_info::crate_version;
+use adventofcode_2020::common::day_input_filename;
+use adventofcode_2020::common::get_file_lines;
+use adventofcode_2020::days;
 
 fn main() -> Result<(), std::io::Error> {
     let cli = App::new(crate_name())
