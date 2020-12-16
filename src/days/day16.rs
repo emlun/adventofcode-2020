@@ -47,7 +47,7 @@ fn solve_b(
 
     let mut field_mapping: HashMap<usize, HashSet<&str>> = (0..)
         .take_while(|i| valid_other_tickets.iter().any(|t| t.len() >= *i))
-        .map(|i| {
+        .flat_map(|i| {
             let mut possible_fields: Vec<HashSet<&str>> = valid_other_tickets
                 .iter()
                 .flat_map(|ticket| ticket.get(i))
@@ -67,14 +67,10 @@ fn solve_b(
                 })
                 .collect();
 
-            (
-                i,
-                possible_fields
-                    .pop()
-                    .map(|first| first.intersection_all(possible_fields.iter())),
-            )
+            possible_fields
+                .pop()
+                .map(|first| (i, first.intersection_all(possible_fields.iter())))
         })
-        .flat_map(|(k, v)| v.map(|v| (k, v)))
         .collect();
 
     let field_keys: HashSet<usize> = field_mapping.keys().copied().collect();
