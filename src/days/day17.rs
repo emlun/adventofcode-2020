@@ -96,12 +96,12 @@ where
             } else {
                 0
             };
-            dbg!(c1, c2);
+            // dbg!(c1, c2);
             std::cmp::min(c1, c2)..=std::cmp::max(c1, c2)
         } else {
             0..=-1
         };
-        dbg!(l, &r);
+        // dbg!(l, &r);
         r
     }
 }
@@ -207,6 +207,110 @@ impl State {
     }
 }
 
+#[derive(Clone)]
+struct State4 {
+    pub dimensions: MiddleVec<MiddleVec<MiddleVec<MiddleVec<bool>>>>,
+}
+
+impl State4 {
+    fn new(initial_plane: MiddleVec<MiddleVec<bool>>) -> Self {
+        Self {
+            dimensions: MiddleVec::of(MiddleVec::of(initial_plane)),
+        }
+    }
+
+    fn get(&self, x: isize, y: isize, z: isize, w: isize) -> Option<&bool> {
+        self.dimensions
+            .get(x)
+            .and_then(|x| x.get(y))
+            .and_then(|y| y.get(z))
+            .and_then(|z| z.get(w))
+    }
+
+    fn get_mut(&mut self, x: isize, y: isize, z: isize, w: isize) -> &mut bool {
+        self.dimensions.get_mut(x).get_mut(y).get_mut(z).get_mut(w)
+    }
+
+    fn coords(
+        &self,
+    ) -> (
+        RangeInclusive<isize>,
+        RangeInclusive<isize>,
+        RangeInclusive<isize>,
+        RangeInclusive<isize>,
+    ) {
+        let x = self.dimensions.coords();
+        let ymin = self
+            .dimensions
+            .value
+            .iter()
+            .flat_map(|ys| ys.coords().min())
+            .min()
+            .unwrap_or(0);
+        let ymax = self
+            .dimensions
+            .value
+            .iter()
+            .flat_map(|ys| ys.coords().max())
+            .max()
+            .unwrap_or(0);
+        let zmin = self
+            .dimensions
+            .value
+            .iter()
+            .flat_map(|ys| ys.value.iter().flat_map(|zs| zs.coords().min()))
+            .min()
+            .unwrap_or(0);
+        let zmax = self
+            .dimensions
+            .value
+            .iter()
+            .flat_map(|ys| ys.value.iter().flat_map(|zs| zs.coords().max()))
+            .max()
+            .unwrap_or(0);
+        let wmin = self
+            .dimensions
+            .value
+            .iter()
+            .flat_map(|ys| {
+                ys.value
+                    .iter()
+                    .flat_map(|zs| zs.value.iter().flat_map(|ws| ws.coords().min()))
+            })
+            .min()
+            .unwrap_or(0);
+        let wmax = self
+            .dimensions
+            .value
+            .iter()
+            .flat_map(|ys| {
+                ys.value
+                    .iter()
+                    .flat_map(|zs| zs.value.iter().flat_map(|ws| ws.coords().max()))
+            })
+            .max()
+            .unwrap_or(0);
+        (x, ymin..=ymax, zmin..=zmax, wmin..=wmax)
+    }
+
+    fn coords_expanded(
+        &self,
+    ) -> (
+        RangeInclusive<isize>,
+        RangeInclusive<isize>,
+        RangeInclusive<isize>,
+        RangeInclusive<isize>,
+    ) {
+        let (x, y, z, w) = self.coords();
+        (
+            x.clone().min().unwrap() - 1..=x.max().unwrap() + 1,
+            y.clone().min().unwrap() - 1..=y.max().unwrap() + 1,
+            z.clone().min().unwrap() - 1..=z.max().unwrap() + 1,
+            w.clone().min().unwrap() - 1..=w.max().unwrap() + 1,
+        )
+    }
+}
+
 fn simulate(state: State, dxyz: &[(isize, isize, isize)], steps: usize) -> usize {
     let mut buf1 = state.clone();
     let mut buf2 = state;
@@ -258,6 +362,60 @@ fn simulate(state: State, dxyz: &[(isize, isize, isize)], steps: usize) -> usize
         .count()
 }
 
+fn simulate4(state: State4, dxyzw: &[(isize, isize, isize, isize)], steps: usize) -> usize {
+    let mut buf1 = state.clone();
+    let mut buf2 = state;
+
+    let mut current = &mut buf1;
+    let mut next = &mut buf2;
+
+    for t in 0..steps {
+        // dbg!(t);
+        // print_state(&current);
+
+        let (xs, ys, zs, ws) = current.coords_expanded();
+        for x in xs {
+            for y in ys.clone() {
+                for z in zs.clone() {
+                    for w in ws.clone() {
+                        let num_neighbors = dxyzw
+                            .iter()
+                            .map(|(dx, dy, dz, dw)| current.get(x + dx, y + dy, z + dz, w + dw))
+                            .filter(|tile| *tile.unwrap_or(&false))
+                            .count();
+
+                        *next.get_mut(x, y, z, w) = if *current.get(x, y, z, w).unwrap_or(&false) {
+                            if num_neighbors == 2 || num_neighbors == 3 {
+                                true
+                            } else {
+                                false
+                            }
+                        } else {
+                            if num_neighbors == 3 {
+                                true
+                            } else {
+                                false
+                            }
+                        };
+                    }
+                }
+            }
+        }
+
+        std::mem::swap(&mut current, &mut next);
+    }
+
+    current
+        .dimensions
+        .value
+        .iter()
+        .flat_map(|dim| dim.value.iter())
+        .flat_map(|dim| dim.value.iter())
+        .flat_map(|dim| dim.value.iter())
+        .filter(|tile| **tile)
+        .count()
+}
+
 pub fn solve(lines: &[String]) -> Solution {
     let map: State = State::new(
         lines
@@ -283,5 +441,16 @@ pub fn solve(lines: &[String]) -> Solution {
         .filter(|(dx, dy, dz)| (*dx, *dy, *dz) != (0, 0, 0))
         .collect();
 
-    (simulate(map, &dxyz, 6).to_string(), "".to_string())
+    let dxyzw: Vec<(isize, isize, isize, isize)> = ((-1)..=1)
+        .flat_map(|dx| ((-1)..=1).map(move |dy| (dx, dy)))
+        .flat_map(|(dx, dy)| ((-1)..=1).map(move |dz| (dx, dy, dz)))
+        .flat_map(|(dx, dy, dz)| ((-1)..=1).map(move |dw| (dx, dy, dz, dw)))
+        .filter(|(dx, dy, dz, dw)| (*dx, *dy, *dz, *dw) != (0, 0, 0, 0))
+        .collect();
+
+    let state_b = State4::new(map.dimensions.value[0].clone());
+    (
+        simulate(map, &dxyz, 6).to_string(),
+        simulate4(state_b, &dxyzw, 6).to_string(),
+    )
 }
