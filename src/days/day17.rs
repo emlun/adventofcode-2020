@@ -293,7 +293,7 @@ fn simulate(state: State, dxyz: &[(isize, isize, isize)], steps: usize) -> usize
                         .filter(|tile| *tile.unwrap_or(&false))
                         .count();
 
-                    *next.get_mut(x, y, z) = if *current.get(x, y, z).unwrap_or(&false) {
+                    let next_value = if *current.get(x, y, z).unwrap_or(&false) {
                         if num_neighbors == 2 || num_neighbors == 3 {
                             true
                         } else {
@@ -306,6 +306,13 @@ fn simulate(state: State, dxyz: &[(isize, isize, isize)], steps: usize) -> usize
                             false
                         }
                     };
+
+                    let n = next.get(x, y, z);
+                    if (next_value == true && n != Some(&true))
+                        || next_value == false && n == Some(&true)
+                    {
+                        *next.get_mut(x, y, z) = next_value;
+                    }
                 }
             }
         }
@@ -344,7 +351,7 @@ fn simulate4(state: State4, dxyzw: &[(isize, isize, isize, isize)], steps: usize
                             .filter(|tile| *tile.unwrap_or(&false))
                             .count();
 
-                        *next.get_mut(x, y, z, w) = if *current.get(x, y, z, w).unwrap_or(&false) {
+                        let next_value = if *current.get(x, y, z, w).unwrap_or(&false) {
                             if num_neighbors == 2 || num_neighbors == 3 {
                                 true
                             } else {
@@ -357,6 +364,13 @@ fn simulate4(state: State4, dxyzw: &[(isize, isize, isize, isize)], steps: usize
                                 false
                             }
                         };
+
+                        let n = next.get(x, y, z, w);
+                        if (next_value == true && n != Some(&true))
+                            || next_value == false && n == Some(&true)
+                        {
+                            *next.get_mut(x, y, z, w) = next_value;
+                        }
                     }
                 }
             }
