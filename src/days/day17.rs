@@ -45,8 +45,9 @@ where
         }
     }
 
-    fn coords(&self) -> Range<isize> {
-        (-isize::try_from(self.neg.len()).unwrap())..isize::try_from(self.pos.len()).unwrap()
+    fn coords_expanded(&self) -> Range<isize> {
+        (-isize::try_from(self.neg.len()).unwrap() - 1)
+            ..(isize::try_from(self.pos.len()).unwrap() + 1)
     }
 
     fn iter(&self) -> std::iter::Chain<std::slice::Iter<'_, T>, std::slice::Iter<'_, T>> {
@@ -104,7 +105,7 @@ impl State {
         self.dimensions.get_mut(x).get_mut(y).get_mut(z).get_mut(w)
     }
 
-    fn coords(
+    fn coords_expanded(
         &self,
     ) -> (
         Range<isize>,
@@ -112,29 +113,29 @@ impl State {
         RangeInclusive<isize>,
         RangeInclusive<isize>,
     ) {
-        let x = self.dimensions.coords();
+        let x = self.dimensions.coords_expanded();
         let ymin = self
             .dimensions
             .iter()
-            .flat_map(|ys| ys.coords().min())
+            .flat_map(|ys| ys.coords_expanded().min())
             .min()
             .unwrap_or(0);
         let ymax = self
             .dimensions
             .iter()
-            .flat_map(|ys| ys.coords().max())
+            .flat_map(|ys| ys.coords_expanded().max())
             .max()
             .unwrap_or(0);
         let zmin = self
             .dimensions
             .iter()
-            .flat_map(|ys| ys.iter().flat_map(|zs| zs.coords().min()))
+            .flat_map(|ys| ys.iter().flat_map(|zs| zs.coords_expanded().min()))
             .min()
             .unwrap_or(0);
         let zmax = self
             .dimensions
             .iter()
-            .flat_map(|ys| ys.iter().flat_map(|zs| zs.coords().max()))
+            .flat_map(|ys| ys.iter().flat_map(|zs| zs.coords_expanded().max()))
             .max()
             .unwrap_or(0);
         let wmin = self
@@ -142,7 +143,7 @@ impl State {
             .iter()
             .flat_map(|ys| {
                 ys.iter()
-                    .flat_map(|zs| zs.iter().flat_map(|ws| ws.coords().min()))
+                    .flat_map(|zs| zs.iter().flat_map(|ws| ws.coords_expanded().min()))
             })
             .min()
             .unwrap_or(0);
@@ -151,28 +152,11 @@ impl State {
             .iter()
             .flat_map(|ys| {
                 ys.iter()
-                    .flat_map(|zs| zs.iter().flat_map(|ws| ws.coords().max()))
+                    .flat_map(|zs| zs.iter().flat_map(|ws| ws.coords_expanded().max()))
             })
             .max()
             .unwrap_or(0);
         (x, ymin..=ymax, zmin..=zmax, wmin..=wmax)
-    }
-
-    fn coords_expanded(
-        &self,
-    ) -> (
-        RangeInclusive<isize>,
-        RangeInclusive<isize>,
-        RangeInclusive<isize>,
-        RangeInclusive<isize>,
-    ) {
-        let (x, y, z, w) = self.coords();
-        (
-            x.clone().min().unwrap() - 1..=x.max().unwrap() + 1,
-            y.clone().min().unwrap() - 1..=y.max().unwrap() + 1,
-            z.clone().min().unwrap() - 1..=z.max().unwrap() + 1,
-            w.clone().min().unwrap() - 1..=w.max().unwrap() + 1,
-        )
     }
 }
 
