@@ -1,5 +1,6 @@
 use crate::common::Solution;
-use std::collections::HashMap;
+use std::convert::TryFrom;
+use std::ops::Range;
 use std::ops::RangeInclusive;
 
 #[allow(unused)]
@@ -31,88 +32,66 @@ fn print_state(state: &State) {
 }
 
 #[derive(Clone)]
-struct MiddleVec<T> {
-    value: Vec<T>,
+struct DoubleVec<T> {
+    pos: Vec<T>,
+    neg: Vec<T>,
 }
 
-impl<T> MiddleVec<T>
+impl<T> DoubleVec<T>
 where
     T: Clone,
     T: Default,
 {
     fn of(v: T) -> Self {
-        MiddleVec { value: vec![v] }
+        DoubleVec {
+            pos: vec![v],
+            neg: vec![],
+        }
     }
 
     fn get(&self, coord: isize) -> Option<&T> {
-        let i = Self::coord_to_index(coord);
-        self.value.get(i)
+        if coord >= 0 {
+            self.pos.get(usize::try_from(coord).unwrap())
+        } else {
+            self.neg.get(usize::try_from(coord.abs() - 1).unwrap())
+        }
     }
 
     fn get_mut(&mut self, coord: isize) -> &mut T {
-        let i = Self::coord_to_index(coord);
-        if i >= self.value.len() {
-            self.value.resize(i + 1, T::default());
-        }
-        self.value.get_mut(i).unwrap()
-    }
-
-    fn coord_to_index(coord: isize) -> usize {
-        coord.abs() as usize * 2 - ((coord < 0) as usize)
-    }
-
-    fn index_to_coord(index: usize) -> isize {
-        if index % 2 == 0 {
-            index as isize / 2
+        if coord >= 0 {
+            let i = usize::try_from(coord).unwrap();
+            if i >= self.pos.len() {
+                self.pos.resize(i + 1, T::default());
+            }
+            self.pos.get_mut(i).unwrap()
         } else {
-            -(index as isize / 2) - 1
+            let j = usize::try_from(coord.abs() - 1).unwrap();
+            if j >= self.neg.len() {
+                self.neg.resize(j + 1, T::default());
+            }
+            self.neg.get_mut(j).unwrap()
         }
     }
 
-    fn coords(&self) -> RangeInclusive<isize> {
-        let l = self.value.len();
-        let r = if l > 0 {
-            let c1 = Self::index_to_coord(l - 1);
-            let c2 = if l > 1 {
-                Self::index_to_coord(l - 2)
-            } else {
-                0
-            };
-            // dbg!(c1, c2);
-            std::cmp::min(c1, c2)..=std::cmp::max(c1, c2)
-        } else {
-            0..=-1
-        };
-        // dbg!(l, &r);
-        r
+    fn coords(&self) -> Range<isize> {
+        (-isize::try_from(self.neg.len()).unwrap())..isize::try_from(self.pos.len()).unwrap()
     }
 
-    fn coords_expanded(&self) -> RangeInclusive<isize> {
-        let l = self.value.len() + 2;
-        let r = if l > 0 {
-            let c1 = Self::index_to_coord(l - 1);
-            let c2 = if l > 1 {
-                Self::index_to_coord(l - 2)
-            } else {
-                0
-            };
-            // dbg!(c1, c2);
-            std::cmp::min(c1, c2)..=std::cmp::max(c1, c2)
-        } else {
-            0..=-1
-        };
-        // dbg!(l, &r);
-        r
+    fn iter(&self) -> std::iter::Chain<std::slice::Iter<'_, T>, std::slice::Iter<'_, T>> {
+        self.pos.iter().chain(self.neg.iter())
     }
 }
 
-impl<T> Default for MiddleVec<T> {
+impl<T> Default for DoubleVec<T> {
     fn default() -> Self {
-        Self { value: vec![] }
+        Self {
+            pos: vec![],
+            neg: vec![],
+        }
     }
 }
 
-impl<T> std::iter::FromIterator<T> for MiddleVec<T>
+impl<T> std::iter::FromIterator<T> for DoubleVec<T>
 where
     T: Clone,
     T: Default,
@@ -121,7 +100,7 @@ where
     where
         I: IntoIterator<Item = T>,
     {
-        let mut slf = MiddleVec::default();
+        let mut slf = DoubleVec::default();
         for (i, item) in it.into_iter().enumerate() {
             *slf.get_mut(i as isize) = item;
         }
@@ -131,13 +110,13 @@ where
 
 #[derive(Clone)]
 struct State {
-    pub dimensions: MiddleVec<MiddleVec<MiddleVec<bool>>>,
+    pub dimensions: DoubleVec<DoubleVec<DoubleVec<bool>>>,
 }
 
 impl State {
-    fn new(initial_plane: MiddleVec<MiddleVec<bool>>) -> Self {
+    fn new(initial_plane: DoubleVec<DoubleVec<bool>>) -> Self {
         State {
-            dimensions: MiddleVec::of(initial_plane),
+            dimensions: DoubleVec::of(initial_plane),
         }
     }
 
@@ -152,40 +131,30 @@ impl State {
         self.dimensions.get_mut(x).get_mut(y).get_mut(z)
     }
 
-    fn coords(
-        &self,
-    ) -> (
-        RangeInclusive<isize>,
-        RangeInclusive<isize>,
-        RangeInclusive<isize>,
-    ) {
+    fn coords(&self) -> (Range<isize>, RangeInclusive<isize>, RangeInclusive<isize>) {
         let x = self.dimensions.coords();
         let ymin = self
             .dimensions
-            .value
             .iter()
             .flat_map(|ys| ys.coords().min())
             .min()
             .unwrap_or(0);
         let ymax = self
             .dimensions
-            .value
             .iter()
             .flat_map(|ys| ys.coords().max())
             .max()
             .unwrap_or(0);
         let zmin = self
             .dimensions
-            .value
             .iter()
-            .flat_map(|ys| ys.value.iter().flat_map(|zs| zs.coords().min()))
+            .flat_map(|ys| ys.iter().flat_map(|zs| zs.coords().min()))
             .min()
             .unwrap_or(0);
         let zmax = self
             .dimensions
-            .value
             .iter()
-            .flat_map(|ys| ys.value.iter().flat_map(|zs| zs.coords().max()))
+            .flat_map(|ys| ys.iter().flat_map(|zs| zs.coords().max()))
             .max()
             .unwrap_or(0);
         (x, ymin..=ymax, zmin..=zmax)
@@ -209,13 +178,13 @@ impl State {
 
 #[derive(Clone)]
 struct State4 {
-    pub dimensions: MiddleVec<MiddleVec<MiddleVec<MiddleVec<bool>>>>,
+    pub dimensions: DoubleVec<DoubleVec<DoubleVec<DoubleVec<bool>>>>,
 }
 
 impl State4 {
-    fn new(initial_plane: MiddleVec<MiddleVec<bool>>) -> Self {
+    fn new(initial_plane: DoubleVec<DoubleVec<bool>>) -> Self {
         Self {
-            dimensions: MiddleVec::of(MiddleVec::of(initial_plane)),
+            dimensions: DoubleVec::of(DoubleVec::of(initial_plane)),
         }
     }
 
@@ -234,7 +203,7 @@ impl State4 {
     fn coords(
         &self,
     ) -> (
-        RangeInclusive<isize>,
+        Range<isize>,
         RangeInclusive<isize>,
         RangeInclusive<isize>,
         RangeInclusive<isize>,
@@ -242,51 +211,43 @@ impl State4 {
         let x = self.dimensions.coords();
         let ymin = self
             .dimensions
-            .value
             .iter()
             .flat_map(|ys| ys.coords().min())
             .min()
             .unwrap_or(0);
         let ymax = self
             .dimensions
-            .value
             .iter()
             .flat_map(|ys| ys.coords().max())
             .max()
             .unwrap_or(0);
         let zmin = self
             .dimensions
-            .value
             .iter()
-            .flat_map(|ys| ys.value.iter().flat_map(|zs| zs.coords().min()))
+            .flat_map(|ys| ys.iter().flat_map(|zs| zs.coords().min()))
             .min()
             .unwrap_or(0);
         let zmax = self
             .dimensions
-            .value
             .iter()
-            .flat_map(|ys| ys.value.iter().flat_map(|zs| zs.coords().max()))
+            .flat_map(|ys| ys.iter().flat_map(|zs| zs.coords().max()))
             .max()
             .unwrap_or(0);
         let wmin = self
             .dimensions
-            .value
             .iter()
             .flat_map(|ys| {
-                ys.value
-                    .iter()
-                    .flat_map(|zs| zs.value.iter().flat_map(|ws| ws.coords().min()))
+                ys.iter()
+                    .flat_map(|zs| zs.iter().flat_map(|ws| ws.coords().min()))
             })
             .min()
             .unwrap_or(0);
         let wmax = self
             .dimensions
-            .value
             .iter()
             .flat_map(|ys| {
-                ys.value
-                    .iter()
-                    .flat_map(|zs| zs.value.iter().flat_map(|ws| ws.coords().max()))
+                ys.iter()
+                    .flat_map(|zs| zs.iter().flat_map(|ws| ws.coords().max()))
             })
             .max()
             .unwrap_or(0);
@@ -318,7 +279,7 @@ fn simulate(state: State, dxyz: &[(isize, isize, isize)], steps: usize) -> usize
     let mut current = &mut buf1;
     let mut next = &mut buf2;
 
-    for t in 0..steps {
+    for _ in 0..steps {
         // dbg!(t);
         // print_state(&current);
 
@@ -354,10 +315,9 @@ fn simulate(state: State, dxyz: &[(isize, isize, isize)], steps: usize) -> usize
 
     current
         .dimensions
-        .value
         .iter()
-        .flat_map(|dim| dim.value.iter())
-        .flat_map(|dim| dim.value.iter())
+        .flat_map(|dim| dim.iter())
+        .flat_map(|dim| dim.iter())
         .filter(|tile| **tile)
         .count()
 }
@@ -369,7 +329,7 @@ fn simulate4(state: State4, dxyzw: &[(isize, isize, isize, isize)], steps: usize
     let mut current = &mut buf1;
     let mut next = &mut buf2;
 
-    for t in 0..steps {
+    for _ in 0..steps {
         // dbg!(t);
         // print_state(&current);
 
@@ -407,11 +367,10 @@ fn simulate4(state: State4, dxyzw: &[(isize, isize, isize, isize)], steps: usize
 
     current
         .dimensions
-        .value
         .iter()
-        .flat_map(|dim| dim.value.iter())
-        .flat_map(|dim| dim.value.iter())
-        .flat_map(|dim| dim.value.iter())
+        .flat_map(|dim| dim.iter())
+        .flat_map(|dim| dim.iter())
+        .flat_map(|dim| dim.iter())
         .filter(|tile| **tile)
         .count()
 }
@@ -428,9 +387,9 @@ pub fn solve(lines: &[String]) -> Solution {
                         '#' => true,
                         _ => unreachable!(),
                     })
-                    .collect::<MiddleVec<bool>>()
+                    .collect::<DoubleVec<bool>>()
             })
-            .collect::<MiddleVec<MiddleVec<bool>>>(),
+            .collect::<DoubleVec<DoubleVec<bool>>>(),
     );
 
     // print_state(&map);
@@ -448,7 +407,7 @@ pub fn solve(lines: &[String]) -> Solution {
         .filter(|(dx, dy, dz, dw)| (*dx, *dy, *dz, *dw) != (0, 0, 0, 0))
         .collect();
 
-    let state_b = State4::new(map.dimensions.value[0].clone());
+    let state_b = State4::new(map.dimensions.pos[0].clone());
     (
         simulate(map, &dxyz, 6).to_string(),
         simulate4(state_b, &dxyzw, 6).to_string(),
