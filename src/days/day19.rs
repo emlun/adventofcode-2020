@@ -30,10 +30,10 @@ fn match_rules<'a>(
                 }
                 remainings.extend(msgs);
             }
-            if remainings.len() > 0 {
-                Some(remainings)
-            } else {
+            if remainings.is_empty() {
                 None
+            } else {
+                Some(remainings)
             }
         }
     }
@@ -74,7 +74,7 @@ pub fn solve(lines: &[String]) -> Solution {
     let rules: HashMap<usize, Rule> = (&mut input)
         .take_while(|l| !l.is_empty())
         .map(|l| {
-            let mut parts = l.split(":");
+            let mut parts = l.split(':');
             let id = parts.next().unwrap().trim();
             let pattern = parts.next().unwrap().trim();
             (
@@ -84,7 +84,7 @@ pub fn solve(lines: &[String]) -> Solution {
                 } else {
                     Rule::Ref(
                         pattern
-                            .split("|")
+                            .split('|')
                             .map(|seq| seq.trim())
                             .map(|seq| seq.split(' ').map(|s| s.parse().unwrap()).collect())
                             .collect(),

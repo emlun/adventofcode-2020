@@ -72,12 +72,10 @@ fn eval(expr: &Node) -> i128 {
     match expr {
         Value(v) => *v,
         Paren(e) => eval(e),
-        Expr(first, rest) => rest
-            .into_iter()
-            .fold(eval(&first), |acc, (op, next)| match op {
-                Op::Add => acc + eval(next),
-                Op::Mul => acc * eval(next),
-            }),
+        Expr(first, rest) => rest.iter().fold(eval(&first), |acc, (op, next)| match op {
+            Op::Add => acc + eval(next),
+            Op::Mul => acc * eval(next),
+        }),
     }
 }
 
@@ -111,7 +109,7 @@ pub fn solve(lines: &[String]) -> Solution {
         exprs.iter().map(|e| eval(e)).sum::<i128>().to_string(),
         exprs
             .into_iter()
-            .map(|e| prioritize_add(e))
+            .map(prioritize_add)
             .map(|e| eval(&e))
             .sum::<i128>()
             .to_string(),

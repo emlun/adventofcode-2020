@@ -181,23 +181,13 @@ fn simulate(state: State, dxyzw: &[(isize, isize, isize, isize)], steps: usize) 
                             .count();
 
                         let next_value = if *current.get(x, y, z, w).unwrap_or(&false) {
-                            if num_neighbors == 2 || num_neighbors == 3 {
-                                true
-                            } else {
-                                false
-                            }
+                            num_neighbors == 2 || num_neighbors == 3
                         } else {
-                            if num_neighbors == 3 {
-                                true
-                            } else {
-                                false
-                            }
+                            num_neighbors == 3
                         };
 
                         let n = next.get(x, y, z, w);
-                        if (next_value == true && n != Some(&true))
-                            || next_value == false && n == Some(&true)
-                        {
+                        if (next_value && n != Some(&true)) || !next_value && n == Some(&true) {
                             *next.get_mut(x, y, z, w) = next_value;
                         }
                     }
