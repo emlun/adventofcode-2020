@@ -1,6 +1,5 @@
 use crate::common::Solution;
 use std::collections::HashMap;
-use std::collections::HashSet;
 
 #[derive(Debug)]
 enum Rule<'slf> {
@@ -8,22 +7,30 @@ enum Rule<'slf> {
     Ref(Vec<Vec<usize>>),
 }
 
-fn matches<'a>(message: &'a str, rule: &Rule, rules: &HashMap<usize, Rule>) -> Option<&'a str> {
+fn matches<'a>(
+    message: &'a str,
+    rule: &Rule,
+    rules: &HashMap<usize, Rule>,
+) -> Option<Vec<&'a str>> {
     match rule {
-        Rule::Simple(pat) => message.strip_prefix(pat),
+        Rule::Simple(pat) => message.strip_prefix(pat).map(|remaining| vec![remaining]),
         Rule::Ref(ors) => {
-            'outer: for seq in ors {
-                let mut msg = message;
+            let mut remainings = vec![];
+            for seq in ors {
+                let mut msgs = vec![message];
                 for subrule in seq {
-                    if let Some(remaining) = matches(msg, &rules[subrule], rules) {
-                        msg = remaining;
-                    } else {
-                        continue 'outer;
-                    }
+                    msgs = msgs
+                        .into_iter()
+                        .flat_map(|msg| matches(msg, &rules[subrule], rules).into_iter().flatten())
+                        .collect();
                 }
-                return Some(msg);
+                remainings.extend(msgs);
             }
-            None
+            if remainings.len() > 0 {
+                Some(remainings)
+            } else {
+                None
+            }
         }
     }
 }
@@ -31,7 +38,32 @@ fn matches<'a>(message: &'a str, rule: &Rule, rules: &HashMap<usize, Rule>) -> O
 fn solve_a(messages: &[&String], rules: &HashMap<usize, Rule>) -> usize {
     messages
         .iter()
-        .filter(|message| matches(message, &rules[&0], rules) == Some(""))
+        .filter(|message| {
+            matches(message, &rules[&0], rules)
+                .map(|v| v.iter().any(|s| s == &""))
+                .unwrap_or(false)
+        })
+        .count()
+}
+
+fn solve_b(messages: &[&String], rules: HashMap<usize, Rule>) -> usize {
+    let b_rules: HashMap<usize, Rule> = rules
+        .into_iter()
+        .map(|(id, rule)| match (id, rule) {
+            (8, Rule::Ref(v)) if v == vec![vec![42]] => (8, Rule::Ref(vec![vec![42], vec![42, 8]])),
+            (11, Rule::Ref(v)) if v == vec![vec![42, 31]] => {
+                (11, Rule::Ref(vec![vec![42, 31], vec![42, 11, 31]]))
+            }
+            (id, rule) => (id, rule),
+        })
+        .collect();
+    messages
+        .iter()
+        .filter(|message| {
+            matches(message, &b_rules[&0], &b_rules)
+                .map(|v| v.iter().any(|s| s == &""))
+                .unwrap_or(false)
+        })
         .count()
 }
 
@@ -60,5 +92,8 @@ pub fn solve(lines: &[String]) -> Solution {
         })
         .collect();
     let messages: Vec<&String> = input.skip_while(|l| l.is_empty()).collect();
-    (solve_a(&messages, &rules).to_string(), "".to_string())
+    (
+        solve_a(&messages, &rules).to_string(),
+        solve_b(&messages, rules).to_string(),
+    )
 }
