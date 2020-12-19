@@ -7,7 +7,7 @@ enum Rule<'slf> {
     Ref(Vec<Vec<usize>>),
 }
 
-fn matches<'a>(
+fn match_rules<'a>(
     message: &'a str,
     rule: &Rule,
     rules: &HashMap<usize, Rule>,
@@ -21,7 +21,11 @@ fn matches<'a>(
                 for subrule in seq {
                     msgs = msgs
                         .into_iter()
-                        .flat_map(|msg| matches(msg, &rules[subrule], rules).into_iter().flatten())
+                        .flat_map(|msg| {
+                            match_rules(msg, &rules[subrule], rules)
+                                .into_iter()
+                                .flatten()
+                        })
                         .collect();
                 }
                 remainings.extend(msgs);
@@ -35,14 +39,16 @@ fn matches<'a>(
     }
 }
 
+fn matches<'a>(message: &'a str, rules: &HashMap<usize, Rule>) -> bool {
+    match_rules(message, &rules[&0], rules)
+        .map(|v| v.contains(&""))
+        .unwrap_or(false)
+}
+
 fn solve_a(messages: &[&String], rules: &HashMap<usize, Rule>) -> usize {
     messages
         .iter()
-        .filter(|message| {
-            matches(message, &rules[&0], rules)
-                .map(|v| v.iter().any(|s| s == &""))
-                .unwrap_or(false)
-        })
+        .filter(|message| matches(message, rules))
         .count()
 }
 
@@ -59,11 +65,7 @@ fn solve_b(messages: &[&String], rules: HashMap<usize, Rule>) -> usize {
         .collect();
     messages
         .iter()
-        .filter(|message| {
-            matches(message, &b_rules[&0], &b_rules)
-                .map(|v| v.iter().any(|s| s == &""))
-                .unwrap_or(false)
-        })
+        .filter(|message| matches(message, &b_rules))
         .count()
 }
 
