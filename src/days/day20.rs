@@ -32,34 +32,34 @@ fn print_image(img: &[Vec<bool>]) {
     );
 }
 
-fn vec_to_int(v: &Vec<bool>) -> u32 {
+fn vec_to_int(v: &[bool]) -> u32 {
     v.iter()
         .fold(0, |i, next| (i << 1) | if *next { 1 } else { 0 })
 }
 
-fn flip_vec<T>(v: &Vec<Vec<T>>, flip: bool) -> Vec<Vec<T>>
+fn flip_vec<T>(v: &[Vec<T>], flip: bool) -> Vec<Vec<T>>
 where
     T: Copy,
 {
     if flip {
-        v.clone()
-            .into_iter()
+        v.iter()
+            .cloned()
             .map(|mut row| {
                 row.reverse();
                 row
             })
             .collect()
     } else {
-        v.clone()
+        v.to_vec()
     }
 }
 
-fn rotate_vec<T>(v: &Vec<Vec<T>>, rot: u8) -> Vec<Vec<T>>
+fn rotate_vec<T>(v: &[Vec<T>], rot: u8) -> Vec<Vec<T>>
 where
     T: Copy,
 {
     match rot {
-        0 => v.clone(),
+        0 => v.to_vec(),
 
         1 => (0..v.len())
             .map(|y| (0..v[y].len()).map(|x| v[v.len() - x - 1][y]).collect())
@@ -81,21 +81,21 @@ where
     }
 }
 
-fn find_in_image(image: &Vec<Vec<bool>>, pattern: &Vec<Vec<bool>>) -> Vec<(usize, usize)> {
+fn find_in_image(image: &[Vec<bool>], pattern: &[Vec<bool>]) -> Vec<(usize, usize)> {
     (0..image.len() - pattern.len())
         .flat_map(|y0| {
             (0..image[0].len() - pattern[0].len())
                 .filter(move |x0| {
-                    for py in 0..pattern.len() {
+                    for (py, pat_row) in pattern.iter().enumerate() {
                         let y = y0 + py;
-                        for px in 0..pattern[py].len() {
+                        for px in 0..pat_row.len() {
                             let x = x0 + px;
                             if pattern[py][px] && !image[y][x] {
                                 return false;
                             }
                         }
                     }
-                    return true;
+                    true
                 })
                 .map(move |x0| (x0, y0))
         })
@@ -169,7 +169,7 @@ fn solve_a(tiles: &HashMap<usize, Vec<Vec<bool>>>) -> usize {
 
     let borders_int: HashMap<usize, Vec<u32>> = borders
         .iter()
-        .map(|(id, bs)| (*id, bs.iter().map(vec_to_int).collect()))
+        .map(|(id, bs)| (*id, bs.iter().map(|v| vec_to_int(&v)).collect()))
         .collect();
 
     let borders_int_backward: HashMap<usize, Vec<u32>> = borders
@@ -483,7 +483,7 @@ pub fn solve(lines: &[String]) -> Solution {
             .parse()
             .unwrap();
         let mut tile: Vec<Vec<bool>> = vec![];
-        while let Some(l) = lines_it.next() {
+        for l in &mut lines_it {
             if l.is_empty() {
                 break;
             } else {
