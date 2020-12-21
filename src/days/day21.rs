@@ -39,7 +39,7 @@ fn solve_b(mut allergens: HashMap<&str, HashSet<&str>>) -> String {
             .into_iter()
             .next()
             .unwrap();
-        for (_, ing) in &mut allergens {
+        for ing in allergens.values_mut() {
             ing.remove(&ingr);
         }
         concluded.insert(unique, ingr);
@@ -100,6 +100,6 @@ pub fn solve(lines: &[String]) -> Solution {
     let (recipes, ingredients, allergens) = parse(lines);
     (
         solve_a(&recipes, &ingredients, &allergens).to_string(),
-        solve_b(allergens).to_string(),
+        solve_b(allergens),
     )
 }
