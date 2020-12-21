@@ -5,11 +5,8 @@ use std::collections::HashSet;
 fn solve_a(
     recipes: &[HashSet<&str>],
     ingredients: &HashSet<&str>,
-    allergens: HashMap<&str, HashSet<&str>>,
+    allergens: &HashMap<&str, HashSet<&str>>,
 ) -> usize {
-    println!("{:?}", ingredients);
-    println!("{:?}", allergens);
-
     let cannot: HashSet<&str> = ingredients
         .difference(
             &allergens
@@ -25,6 +22,37 @@ fn solve_a(
         .iter()
         .map(|ing| ing.intersection(&cannot).count())
         .sum()
+}
+
+fn solve_b(mut allergens: HashMap<&str, HashSet<&str>>) -> String {
+    let mut concluded: HashMap<&str, &str> = HashMap::new();
+
+    while !allergens.is_empty() {
+        let unique: &str = allergens
+            .iter()
+            .find(|(_, ingr)| ingr.len() == 1)
+            .map(|(allr, _)| allr)
+            .unwrap();
+        let ingr = allergens
+            .remove(unique)
+            .unwrap()
+            .into_iter()
+            .next()
+            .unwrap();
+        for (_, ing) in &mut allergens {
+            ing.remove(&ingr);
+        }
+        concluded.insert(unique, ingr);
+    }
+
+    let mut canon: Vec<(&str, &str)> = concluded.into_iter().collect();
+    canon.sort_by_key(|(allrg, _)| *allrg);
+
+    canon
+        .into_iter()
+        .map(|(_, ingr)| ingr)
+        .collect::<Vec<&str>>()
+        .join(",")
 }
 
 fn parse(
@@ -71,7 +99,7 @@ fn parse(
 pub fn solve(lines: &[String]) -> Solution {
     let (recipes, ingredients, allergens) = parse(lines);
     (
-        solve_a(&recipes, &ingredients, allergens).to_string(),
-        "".to_string(),
+        solve_a(&recipes, &ingredients, &allergens).to_string(),
+        solve_b(allergens).to_string(),
     )
 }
