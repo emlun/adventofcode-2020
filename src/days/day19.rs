@@ -50,10 +50,7 @@ fn solve_b(messages: &[&String], rules: BTreeMap<usize, Rule>) -> usize {
             (id, rule) => (id, rule),
         })
         .collect();
-    messages
-        .iter()
-        .filter(|message| matches(message, &b_rules))
-        .count()
+    solve_a(messages, &b_rules)
 }
 
 pub fn solve(lines: &[String]) -> Solution {
