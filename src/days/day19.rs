@@ -18,7 +18,7 @@ fn match_rules<'a>(message: &'a str, rule: &Rule, rules: &BTreeMap<usize, Rule>)
             for seq in ors {
                 let msgs = seq.iter().fold(vec![message], |msgs, subrule| {
                     msgs.into_iter()
-                        .flat_map(|msg| match_rules(msg, &rules[subrule], rules).into_iter())
+                        .flat_map(|msg| match_rules(msg, &rules[subrule], rules))
                         .collect()
                 });
                 remainings.extend(msgs);
