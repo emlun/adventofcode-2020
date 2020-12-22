@@ -17,17 +17,15 @@ fn match_rules<'a>(
         Rule::Ref(ors) => {
             let mut remainings = vec![];
             for seq in ors {
-                let mut msgs = vec![message];
-                for subrule in seq {
-                    msgs = msgs
-                        .into_iter()
+                let msgs = seq.iter().fold(vec![message], |msgs, subrule| {
+                    msgs.into_iter()
                         .flat_map(|msg| {
                             match_rules(msg, &rules[subrule], rules)
                                 .into_iter()
                                 .flatten()
                         })
-                        .collect();
-                }
+                        .collect()
+                });
                 remainings.extend(msgs);
             }
             if remainings.is_empty() {
