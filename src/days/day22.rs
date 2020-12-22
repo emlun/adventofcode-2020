@@ -77,7 +77,7 @@ fn play_recursive(
 }
 
 fn solve_b(player1: VecDeque<usize>, player2: VecDeque<usize>) -> usize {
-    let (_, winner) = play_recursive(player1.clone(), player2.clone());
+    let (_, winner) = play_recursive(player1, player2);
     let l = winner.len();
     winner
         .into_iter()
