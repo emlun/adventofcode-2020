@@ -7,40 +7,29 @@ enum Rule<'slf> {
     Ref(Vec<Vec<usize>>),
 }
 
-fn match_rules<'a>(
-    message: &'a str,
-    rule: &Rule,
-    rules: &HashMap<usize, Rule>,
-) -> Option<Vec<&'a str>> {
+fn match_rules<'a>(message: &'a str, rule: &Rule, rules: &HashMap<usize, Rule>) -> Vec<&'a str> {
     match rule {
-        Rule::Simple(pat) => message.strip_prefix(pat).map(|remaining| vec![remaining]),
+        Rule::Simple(pat) => message
+            .strip_prefix(pat)
+            .map(|remaining| vec![remaining])
+            .unwrap_or(vec![]),
         Rule::Ref(ors) => {
             let mut remainings = vec![];
             for seq in ors {
                 let msgs = seq.iter().fold(vec![message], |msgs, subrule| {
                     msgs.into_iter()
-                        .flat_map(|msg| {
-                            match_rules(msg, &rules[subrule], rules)
-                                .into_iter()
-                                .flatten()
-                        })
+                        .flat_map(|msg| match_rules(msg, &rules[subrule], rules).into_iter())
                         .collect()
                 });
                 remainings.extend(msgs);
             }
-            if remainings.is_empty() {
-                None
-            } else {
-                Some(remainings)
-            }
+            remainings
         }
     }
 }
 
 fn matches<'a>(message: &'a str, rules: &HashMap<usize, Rule>) -> bool {
-    match_rules(message, &rules[&0], rules)
-        .map(|v| v.contains(&""))
-        .unwrap_or(false)
+    match_rules(message, &rules[&0], rules).contains(&"")
 }
 
 fn solve_a(messages: &[&String], rules: &HashMap<usize, Rule>) -> usize {
