@@ -12,7 +12,7 @@ fn match_rules<'a>(message: &'a str, rule: &Rule, rules: &BTreeMap<usize, Rule>)
         Rule::Simple(pat) => message
             .strip_prefix(pat)
             .map(|remaining| vec![remaining])
-            .unwrap_or(vec![]),
+            .unwrap_or_default(),
         Rule::Ref(ors) => {
             let mut remainings = vec![];
             for seq in ors {
