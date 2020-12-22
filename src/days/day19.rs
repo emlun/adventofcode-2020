@@ -1,5 +1,5 @@
 use crate::common::Solution;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 #[derive(Debug)]
 enum Rule<'slf> {
@@ -7,7 +7,7 @@ enum Rule<'slf> {
     Ref(Vec<Vec<usize>>),
 }
 
-fn match_rules<'a>(message: &'a str, rule: &Rule, rules: &HashMap<usize, Rule>) -> Vec<&'a str> {
+fn match_rules<'a>(message: &'a str, rule: &Rule, rules: &BTreeMap<usize, Rule>) -> Vec<&'a str> {
     match rule {
         Rule::Simple(pat) => message
             .strip_prefix(pat)
@@ -28,19 +28,19 @@ fn match_rules<'a>(message: &'a str, rule: &Rule, rules: &HashMap<usize, Rule>) 
     }
 }
 
-fn matches<'a>(message: &'a str, rules: &HashMap<usize, Rule>) -> bool {
+fn matches<'a>(message: &'a str, rules: &BTreeMap<usize, Rule>) -> bool {
     match_rules(message, &rules[&0], rules).contains(&"")
 }
 
-fn solve_a(messages: &[&String], rules: &HashMap<usize, Rule>) -> usize {
+fn solve_a(messages: &[&String], rules: &BTreeMap<usize, Rule>) -> usize {
     messages
         .iter()
         .filter(|message| matches(message, rules))
         .count()
 }
 
-fn solve_b(messages: &[&String], rules: HashMap<usize, Rule>) -> usize {
-    let b_rules: HashMap<usize, Rule> = rules
+fn solve_b(messages: &[&String], rules: BTreeMap<usize, Rule>) -> usize {
+    let b_rules: BTreeMap<usize, Rule> = rules
         .into_iter()
         .map(|(id, rule)| match (id, rule) {
             (8, Rule::Ref(v)) if v == vec![vec![42]] => (8, Rule::Ref(vec![vec![42], vec![42, 8]])),
@@ -58,7 +58,7 @@ fn solve_b(messages: &[&String], rules: HashMap<usize, Rule>) -> usize {
 
 pub fn solve(lines: &[String]) -> Solution {
     let mut input = lines.iter();
-    let rules: HashMap<usize, Rule> = (&mut input)
+    let rules: BTreeMap<usize, Rule> = (&mut input)
         .take_while(|l| !l.is_empty())
         .map(|l| {
             let mut parts = l.split(':');
