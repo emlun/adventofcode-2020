@@ -54,3 +54,4 @@ test_day!(day18, "654686398176", "8952864356993");
 test_day!(day19, "113", "253");
 test_day!(day20, "7901522557967", "2476");
 test_day!(day21, "2614", "qhvz,kbcpn,fzsl,mjzrj,bmj,mksmf,gptv,kgkrhg");
+test_day!(day22, "35299", "33266");
