@@ -12,33 +12,41 @@ fn mod1(a: usize, modulus: usize) -> usize {
     }
 }
 
-fn solve_a(mut cups: Vec<usize>) -> String {
+fn simulate(mut cups: VecDeque<usize>, moves: usize) -> VecDeque<usize> {
     let l = cups.len();
     let mut current_index = 0;
 
-    for _ in 0..100 {
+    for _ in 0..moves {
+        // dbg!(mv);
+
         let current_label = cups[current_index];
 
-        dbg!(&cups);
-        dbg!(current_index, current_label);
+        // dbg!(&cups);
+        // dbg!(current_index, current_label);
 
-        let cup1 = cups.remove(if current_index + 1 >= cups.len() {
-            0
-        } else {
-            current_index + 1
-        });
-        let cup2 = cups.remove(if current_index + 1 >= cups.len() {
-            0
-        } else {
-            current_index + 1
-        });
-        let cup3 = cups.remove(if current_index + 1 >= cups.len() {
-            0
-        } else {
-            current_index + 1
-        });
+        let cup1 = cups
+            .remove(if current_index + 1 >= cups.len() {
+                0
+            } else {
+                current_index + 1
+            })
+            .unwrap();
+        let cup2 = cups
+            .remove(if current_index + 1 >= cups.len() {
+                0
+            } else {
+                current_index + 1
+            })
+            .unwrap();
+        let cup3 = cups
+            .remove(if current_index + 1 >= cups.len() {
+                0
+            } else {
+                current_index + 1
+            })
+            .unwrap();
 
-        dbg!(cup1, cup2, cup3);
+        // dbg!(cup1, cup2, cup3);
 
         let dest_label: usize = **(&[
             mod1(current_label + l - 1, l),
@@ -50,7 +58,7 @@ fn solve_a(mut cups: Vec<usize>) -> String {
         .find(|c| **c != cup1 && **c != cup2 && **c != cup3)
         .unwrap());
 
-        dbg!(dest_label);
+        // dbg!(dest_label);
 
         let (dest_index, _) = cups
             .iter()
@@ -58,7 +66,7 @@ fn solve_a(mut cups: Vec<usize>) -> String {
             .find(|(_, c)| **c == dest_label)
             .unwrap();
 
-        dbg!(dest_index);
+        // dbg!(dest_index);
 
         cups.insert(dest_index + 1, cup1);
         cups.insert(dest_index + 2, cup2);
@@ -74,7 +82,13 @@ fn solve_a(mut cups: Vec<usize>) -> String {
         current_index = (current_index + 1) % l;
     }
 
-    dbg!(&cups);
+    // dbg!(&cups);
+
+    cups
+}
+
+fn solve_a(cups: VecDeque<usize>) -> String {
+    let cups = simulate(cups, 100);
 
     let labels = cups
         .iter()
@@ -87,16 +101,22 @@ fn solve_a(mut cups: Vec<usize>) -> String {
     format!("{}{}", right, left)
 }
 
-fn solve_b(lines: &[String]) -> usize {
-    0
+fn solve_b(cups: VecDeque<usize>) -> usize {
+    let l = cups.len();
+    let cups = simulate(
+        cups.into_iter().chain(l + 1..=1_000_000).collect(),
+        10_000_000,
+    );
+    let one_index = cups.iter().enumerate().find(|(_, c)| **c == 1).unwrap().0;
+    cups[(one_index + 1) % cups.len()] * cups[(one_index + 2) % cups.len()]
 }
 
 pub fn solve(lines: &[String]) -> Solution {
-    let cups: Vec<usize> = lines
+    let cups: VecDeque<usize> = lines
         .first()
         .unwrap()
         .chars()
         .map(|c| c.to_string().parse().unwrap())
         .collect();
-    (solve_a(cups).to_string(), solve_b(lines).to_string())
+    (solve_a(cups.clone()).to_string(), solve_b(cups).to_string())
 }
