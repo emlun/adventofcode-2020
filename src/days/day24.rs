@@ -1,7 +1,7 @@
 use crate::common::Solution;
 use std::collections::HashSet;
 
-fn solve_a(lines: &[String]) -> usize {
+fn solve_a(lines: &[String]) -> HashSet<(i32, i32)> {
     let mut tiles: HashSet<(i32, i32)> = HashSet::new();
 
     for mut line in lines.iter().map(|s| s.as_str()) {
@@ -31,19 +31,68 @@ fn solve_a(lines: &[String]) -> usize {
                 unreachable!();
             }
         }
+
         if tiles.contains(&(hexx, hexy)) {
             tiles.remove(&(hexx, hexy));
         } else {
             tiles.insert((hexx, hexy));
         }
     }
+
+    tiles
+}
+
+fn solve_b(mut tiles: HashSet<(i32, i32)>) -> usize {
+    const NUM_DAYS: usize = 100;
+
+    for _ in 1..=NUM_DAYS {
+        let affected_tiles: HashSet<(i32, i32)> = tiles
+            .iter()
+            .copied()
+            .flat_map(|(hexx, hexy): (i32, i32)| {
+                vec![
+                    (hexx - 1, hexy - 1),
+                    (hexx, hexy - 1),
+                    (hexx - 1, hexy),
+                    (hexx + 1, hexy),
+                    (hexx, hexy),
+                    (hexx, hexy + 1),
+                    (hexx + 1, hexy + 1),
+                ]
+            })
+            .collect();
+
+        let new_tiles = affected_tiles
+            .into_iter()
+            .filter(|(hexx, hexy)| {
+                let num_black_neighbors = [
+                    (hexx - 1, hexy - 1),
+                    (*hexx, hexy - 1),
+                    (hexx - 1, *hexy),
+                    (hexx + 1, *hexy),
+                    (*hexx, hexy + 1),
+                    (hexx + 1, hexy + 1),
+                ]
+                .iter()
+                .copied()
+                .filter(|nhexxy| tiles.contains(nhexxy))
+                .count();
+
+                if tiles.contains(&(*hexx, *hexy)) {
+                    !(num_black_neighbors == 0 || num_black_neighbors > 2)
+                } else {
+                    num_black_neighbors == 2
+                }
+            })
+            .collect();
+
+        tiles = new_tiles;
+    }
+
     tiles.len()
 }
 
-fn solve_b(lines: &[String]) -> usize {
-    0
-}
-
 pub fn solve(lines: &[String]) -> Solution {
-    (solve_a(lines).to_string(), solve_b(lines).to_string())
+    let tiles = solve_a(lines);
+    (tiles.len().to_string(), solve_b(tiles).to_string())
 }
