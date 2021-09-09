@@ -46,13 +46,10 @@ fn simulate(start_order: &Vec<usize>, l: usize, moves: usize) -> Vec<usize> {
 
 fn solve_a(cups: &Vec<usize>) -> String {
     let cups = simulate(cups, cups.len(), 100);
-    let mut labels = vec![];
-    let mut ii = 0;
-    for _ in 1..cups.len() {
-        labels.push((cups[ii] + 1).to_string());
-        ii = cups[ii];
-    }
-    labels.join("")
+    std::iter::successors(Some(cups[0]), |i| Some(cups[*i]))
+        .take(cups.len() - 1)
+        .map(|i| (i + 1).to_string())
+        .collect::<String>()
 }
 
 fn solve_b(cups: &Vec<usize>) -> usize {
