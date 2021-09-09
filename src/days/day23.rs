@@ -44,26 +44,26 @@ fn simulate(start_order: &Vec<usize>, l: usize, moves: usize) -> Vec<usize> {
     links
 }
 
-fn solve_a(cups: &Vec<usize>) -> String {
-    let cups = simulate(cups, cups.len(), 100);
-    std::iter::successors(Some(cups[0]), |i| Some(cups[*i]))
-        .take(cups.len() - 1)
+fn solve_a(start_order: &Vec<usize>) -> String {
+    let links = simulate(start_order, start_order.len(), 100);
+    std::iter::successors(Some(links[0]), |i| Some(links[*i]))
+        .take(links.len() - 1)
         .map(|i| (i + 1).to_string())
         .collect::<String>()
 }
 
-fn solve_b(cups: &Vec<usize>) -> usize {
-    let cups = simulate(cups, 1_000_000, 10_000_000);
-    (cups[0] + 1) * (cups[cups[0]] + 1)
+fn solve_b(start_order: &Vec<usize>) -> usize {
+    let links = simulate(start_order, 1_000_000, 10_000_000);
+    (links[0] + 1) * (links[links[0]] + 1)
 }
 
 pub fn solve(lines: &[String]) -> Solution {
-    let cups: Vec<usize> = lines
+    let init: Vec<usize> = lines
         .first()
         .unwrap()
         .chars()
         .map(|c| c.to_string().parse().unwrap())
         .map(|i: usize| i - 1)
         .collect();
-    (solve_a(&cups).to_string(), solve_b(&cups).to_string())
+    (solve_a(&init).to_string(), solve_b(&init).to_string())
 }
