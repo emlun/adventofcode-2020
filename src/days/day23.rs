@@ -29,15 +29,10 @@ fn simulate(start_order: &Vec<usize>, l: usize, moves: usize) -> Vec<usize> {
         let cup2 = links[cup1];
         let cup3 = links[cup2];
 
-        let destination: usize = *[
-            (current_cup + l - 1) % l,
-            (current_cup + l - 2) % l,
-            (current_cup + l - 3) % l,
-            (current_cup + l - 4) % l,
-        ]
-        .iter()
-        .find(|i| **i != cup1 && **i != cup2 && **i != cup3)
-        .unwrap();
+        let destination: usize = (1..=4)
+            .map(|i| (current_cup + l - i) % l)
+            .find(|i| *i != cup1 && *i != cup2 && *i != cup3)
+            .unwrap();
 
         links[current_cup] = links[cup3];
         links[cup3] = links[destination];
