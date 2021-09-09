@@ -33,7 +33,7 @@ fn main() -> Result<(), std::io::Error> {
     if let Some(day) = matches.value_of("day") {
         run_day(
             day.parse::<u8>()
-                .unwrap_or_else(|_| panic!(format!("Invalid day number: {}", day))),
+                .unwrap_or_else(|_| panic!("Invalid day number: {}", day)),
             matches.value_of("input-file").map(Path::new),
         )
     } else {
@@ -45,7 +45,7 @@ fn run_day(day: u8, input_path: Option<&Path>) -> Result<(), std::io::Error> {
     println!();
     println!("=== Day {: >2} ===", day);
 
-    let day_func = days::get_solver(day).unwrap_or_else(|| panic!(format!("Unknown day: {}", day)));
+    let day_func = days::get_solver(day).unwrap_or_else(|| panic!("Unknown day: {}", day));
     let lines = input_path
         .map(get_file_lines)
         .unwrap_or_else(|| get_file_lines(&day_input_filename(day)))?;
