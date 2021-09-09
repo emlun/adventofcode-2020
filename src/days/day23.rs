@@ -49,14 +49,10 @@ fn solve_a(cups: &Vec<usize>) -> String {
     let mut labels = vec![];
     let mut ii = 0;
     for _ in 1..cups.len() {
-        labels.push(cups[ii] + 1);
+        labels.push((cups[ii] + 1).to_string());
         ii = cups[ii];
     }
-    labels
-        .into_iter()
-        .map(|c| c.to_string())
-        .collect::<Vec<String>>()
-        .join("")
+    labels.join("")
 }
 
 fn solve_b(cups: &Vec<usize>) -> usize {
