@@ -1,6 +1,6 @@
 use crate::common::Solution;
 
-fn simulate(start_order: &Vec<usize>, l: usize, moves: usize) -> Vec<usize> {
+fn simulate(start_order: &[usize], l: usize, moves: usize) -> Vec<usize> {
     let mut links: Vec<usize> = Vec::with_capacity(l);
     links.resize(start_order.len(), 0);
     for i in 0..start_order.len() {
@@ -33,7 +33,7 @@ fn simulate(start_order: &Vec<usize>, l: usize, moves: usize) -> Vec<usize> {
     links
 }
 
-fn solve_a(start_order: &Vec<usize>) -> String {
+fn solve_a(start_order: &[usize]) -> String {
     let links = simulate(start_order, start_order.len(), 100);
     std::iter::successors(Some(links[0]), |i| Some(links[*i]))
         .take(links.len() - 1)
@@ -41,7 +41,7 @@ fn solve_a(start_order: &Vec<usize>) -> String {
         .collect::<String>()
 }
 
-fn solve_b(start_order: &Vec<usize>) -> usize {
+fn solve_b(start_order: &[usize]) -> usize {
     let links = simulate(start_order, 1_000_000, 10_000_000);
     (links[0] + 1) * (links[links[0]] + 1)
 }
@@ -54,5 +54,5 @@ pub fn solve(lines: &[String]) -> Solution {
         .map(|c| c.to_string().parse().unwrap())
         .map(|i: usize| i - 1)
         .collect();
-    (solve_a(&init).to_string(), solve_b(&init).to_string())
+    (solve_a(&init), solve_b(&init).to_string())
 }

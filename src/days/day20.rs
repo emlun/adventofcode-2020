@@ -169,7 +169,7 @@ fn solve_a(tiles: &HashMap<usize, Vec<Vec<bool>>>) -> usize {
 
     let borders_int: HashMap<usize, Vec<u32>> = borders
         .iter()
-        .map(|(id, bs)| (*id, bs.iter().map(|v| vec_to_int(&v)).collect()))
+        .map(|(id, bs)| (*id, bs.iter().map(|v| vec_to_int(v)).collect()))
         .collect();
 
     let borders_int_backward: HashMap<usize, Vec<u32>> = borders
@@ -188,25 +188,22 @@ fn solve_a(tiles: &HashMap<usize, Vec<Vec<bool>>>) -> usize {
         })
         .collect();
 
-    let best_corners: Vec<&usize> = borders
-        .keys()
-        .filter(|id1| {
-            let num_partners = borders_int[id1]
-                .iter()
-                .filter(|b1| {
-                    borders_int
+    let best_corners = borders.keys().filter(|id1| {
+        let num_partners = borders_int[id1]
+            .iter()
+            .filter(|b1| {
+                borders_int
+                    .iter()
+                    .filter(|(id2, _)| id2 != id1)
+                    .any(|(_, borders2)| borders2.contains(b1))
+                    || borders_int_backward
                         .iter()
                         .filter(|(id2, _)| id2 != id1)
                         .any(|(_, borders2)| borders2.contains(b1))
-                        || borders_int_backward
-                            .iter()
-                            .filter(|(id2, _)| id2 != id1)
-                            .any(|(_, borders2)| borders2.contains(b1))
-                })
-                .count();
-            num_partners == 2
-        })
-        .collect();
+            })
+            .count();
+        num_partners == 2
+    });
 
     best_corners.into_iter().product()
 }
@@ -478,7 +475,7 @@ pub fn solve(lines: &[String]) -> Solution {
         let tile_id = tile_id
             .strip_prefix("Tile ")
             .unwrap()
-            .strip_suffix(":")
+            .strip_suffix(':')
             .unwrap()
             .parse()
             .unwrap();

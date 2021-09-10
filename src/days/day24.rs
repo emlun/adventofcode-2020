@@ -21,10 +21,10 @@ fn solve_a(lines: &[String]) -> HashSet<(i32, i32)> {
                 hexx += 1;
                 hexy += 1;
                 line = remaining;
-            } else if let Some(remaining) = line.strip_prefix("w") {
+            } else if let Some(remaining) = line.strip_prefix('w') {
                 hexx -= 1;
                 line = remaining;
-            } else if let Some(remaining) = line.strip_prefix("e") {
+            } else if let Some(remaining) = line.strip_prefix('e') {
                 hexx += 1;
                 line = remaining;
             } else {

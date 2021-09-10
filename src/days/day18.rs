@@ -72,7 +72,7 @@ fn eval(expr: &Node) -> i128 {
     match expr {
         Value(v) => *v,
         Paren(e) => eval(e),
-        Expr(first, rest) => rest.iter().fold(eval(&first), |acc, (op, next)| match op {
+        Expr(first, rest) => rest.iter().fold(eval(first), |acc, (op, next)| match op {
             Op::Add => acc + eval(next),
             Op::Mul => acc * eval(next),
         }),

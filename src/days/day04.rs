@@ -11,7 +11,7 @@ fn solve_a(passports: &[HashMap<&str, &str>]) -> usize {
         .iter()
         .filter(|passport| {
             let mut passport_keys: HashSet<&&str> = passport.keys().collect();
-            passport_keys.insert(&&"cid");
+            passport_keys.insert(&"cid");
             passport_keys == keyset
         })
         .count()
@@ -28,25 +28,25 @@ fn solve_b(passports: &[HashMap<&str, &str>]) -> usize {
         .iter()
         .filter(|passport| {
             let mut passport_keys: HashSet<&&str> = passport.keys().collect();
-            passport_keys.insert(&&"cid");
+            passport_keys.insert(&"cid");
             passport_keys == keyset
                 && passport.iter().all(|(k, v)| match *k {
                     "byr" => {
                         v.len() == 4
                             && v.parse::<u16>()
-                                .map(|byr| byr >= 1920 && byr <= 2002)
+                                .map(|byr| (1920..=2002).contains(&byr))
                                 .unwrap_or(false)
                     }
                     "iyr" => {
                         v.len() == 4
                             && v.parse::<u16>()
-                                .map(|iyr| iyr >= 2010 && iyr <= 2020)
+                                .map(|iyr| (2010..=2020).contains(&iyr))
                                 .unwrap_or(false)
                     }
                     "eyr" => {
                         v.len() == 4
                             && v.parse::<u16>()
-                                .map(|eyr| eyr >= 2020 && eyr <= 2030)
+                                .map(|eyr| (2020..=2030).contains(&eyr))
                                 .unwrap_or(false)
                     }
                     "hgt" => {
@@ -54,8 +54,8 @@ fn solve_b(passports: &[HashMap<&str, &str>]) -> usize {
                         v[..v.len() - 2]
                             .parse::<u16>()
                             .map(|len| match unit {
-                                "cm" => len >= 150 && len <= 193,
-                                "in" => len >= 59 && len <= 76,
+                                "cm" => (150..=193).contains(&len),
+                                "in" => (59..=76).contains(&len),
                                 _ => false,
                             })
                             .unwrap_or(false)
@@ -65,10 +65,10 @@ fn solve_b(passports: &[HashMap<&str, &str>]) -> usize {
                             && v.starts_with('#')
                             && v.chars()
                                 .skip(1)
-                                .all(|c| (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))
+                                .all(|c| ('0'..='9').contains(&c) || ('a'..='f').contains(&c))
                     }
                     "ecl" => ecls.contains(v),
-                    "pid" => v.len() == 9 && v.chars().all(|c| c >= '0' && c <= '9'),
+                    "pid" => v.len() == 9 && v.chars().all(|c| ('0'..='9').contains(&c)),
                     "cid" => true,
                     _ => unreachable!(),
                 })
@@ -79,7 +79,7 @@ fn solve_b(passports: &[HashMap<&str, &str>]) -> usize {
 pub fn solve(lines: &[String]) -> Solution {
     let passports: Vec<HashMap<&str, &str>> =
         lines.iter().fold(vec![HashMap::new()], |mut result, line| {
-            if line == "" {
+            if line.is_empty() {
                 result.push(HashMap::new());
             } else {
                 for entry in line.split_whitespace() {

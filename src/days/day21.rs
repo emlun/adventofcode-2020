@@ -55,13 +55,11 @@ fn solve_b(mut allergens: HashMap<&str, HashSet<&str>>) -> String {
         .join(",")
 }
 
-fn parse(
-    lines: &[String],
-) -> (
-    Vec<HashSet<&str>>,
-    HashSet<&str>,
-    HashMap<&str, HashSet<&str>>,
-) {
+type Recipes<'a> = Vec<HashSet<&'a str>>;
+type Ingredients<'a> = HashSet<&'a str>;
+type Allergens<'a, 'b> = HashMap<&'a str, HashSet<&'b str>>;
+
+fn parse(lines: &[String]) -> (Recipes, Ingredients, Allergens) {
     let mut recipes: Vec<HashSet<&str>> = vec![];
     let mut ingredients: HashSet<&str> = HashSet::new();
     let mut allergens: HashMap<&str, HashSet<&str>> = HashMap::new();
@@ -77,7 +75,7 @@ fn parse(
 
         if let Some(allrgs) = parts
             .next()
-            .and_then(|s| s.strip_suffix(")"))
+            .and_then(|s| s.strip_suffix(')'))
             .and_then(|s| s.strip_prefix("contains "))
         {
             for allrg in allrgs.split(", ") {
