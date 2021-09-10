@@ -1,29 +1,18 @@
 use crate::common::Solution;
 
 fn simulate(start_order: &Vec<usize>, l: usize, moves: usize) -> Vec<usize> {
-    let mut links: Vec<usize> = (0..start_order.len())
-        .into_iter()
-        .map(|i| {
-            start_order
-                .iter()
-                .enumerate()
-                .find(|(_, s)| **s == i)
-                .map(|(j, _)| {
-                    if j + 1 >= start_order.len() && start_order.len() < l {
-                        j + 1
-                    } else {
-                        start_order[(j + 1) % l]
-                    }
-                })
-                .unwrap()
-        })
-        .chain((start_order.len() + 1)..l)
-        .collect();
+    let mut links: Vec<usize> =
+        (0..start_order.len()).fold(vec![0; start_order.len()], |mut links, i| {
+            links[start_order[i]] = start_order[(i + 1) % start_order.len()];
+            links
+        });
+    links.extend((start_order.len() + 1)..=l);
     if l > start_order.len() {
-        links.push(start_order[0]);
+        links[*start_order.last().unwrap()] = start_order.len();
+        links[l - 1] = start_order[0];
     }
-    let mut current_cup = start_order[0];
 
+    let mut current_cup = start_order[0];
     for _ in 0..moves {
         let cup1 = links[current_cup];
         let cup2 = links[cup1];
