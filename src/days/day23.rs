@@ -1,11 +1,11 @@
 use crate::common::Solution;
 
 fn simulate(start_order: &Vec<usize>, l: usize, moves: usize) -> Vec<usize> {
-    let mut links: Vec<usize> =
-        (0..start_order.len()).fold(vec![0; start_order.len()], |mut links, i| {
-            links[start_order[i]] = start_order[(i + 1) % start_order.len()];
-            links
-        });
+    let mut links: Vec<usize> = Vec::with_capacity(l);
+    links.resize(start_order.len(), 0);
+    for i in 0..start_order.len() {
+        links[start_order[i]] = start_order[(i + 1) % start_order.len()];
+    }
     links.extend((start_order.len() + 1)..=l);
     if l > start_order.len() {
         links[*start_order.last().unwrap()] = start_order.len();
